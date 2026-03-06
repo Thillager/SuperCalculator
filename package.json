@@ -1,12 +1,10 @@
 {
-    "license": "ISC",
     "bin": {"SuperCalculator": "jdeploy-bundle/jdeploy.js"},
-    "name": "SuperCalculator",
-    "files": ["jdeploy-bundle"],
+    "author": "Thillager",
+    "description": "Very nice Calculator",
     "main": "index.js",
     "preferGlobal": true,
     "repository": {"url": "https://github.com/Thillager/SuperCalculator"},
-    "scripts": {"test": "echo \"Error: no test specified\" && exit 1"},
     "version": "1.0.0",
     "jdeploy": {
         "fallbackToUniversal": false,
@@ -16,7 +14,7 @@
             "type": "GITHUB",
             "url": "https://github.com/Thillager/SuperCalculator"
         }],
-        "javaVersion": "21",
+        "javaVersion": "25",
         "jar": "build/libs/SuperCalculator-1.0-SNAPSHOT.jar",
         "title": "SuperCalculator",
         "platformBundlesEnabled": false,
@@ -28,5 +26,9 @@
         "tar": "^4.4.8",
         "yauzl": "^2.10.0",
         "shelljs": "^0.8.4"
-    }
+    },
+    "license": "ISC",
+    "name": "SuperCalculator",
+    "files": ["jdeploy-bundle"],
+    "scripts": {"test": "echo \"Error: no test specified\" && exit 1"}
 }
