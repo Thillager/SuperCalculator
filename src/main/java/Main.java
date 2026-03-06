@@ -11,7 +11,7 @@ import java.net.URL;
 
 public class Main extends JFrame {
     private JTextField inputField;
-    private JButton calcBinom, calcNormal, solveBtn, clearBtn, copyBtn, tempumrechBtn, switchThemeBtn;
+    private JButton calcBinom, calcNormal, solveBtn, clearBtn, copyBtn, tempumrechBtn, switchThemeBtn, autoAusBtn;
     private JTextField resultField;
     private JLabel ergLabel, label;
 
@@ -60,7 +60,10 @@ public class Main extends JFrame {
         switchThemeBtn = new JButton("Theme wechseln");
         styleButton(switchThemeBtn, new Color(52, 73, 94));
 
-        add(calcNormal); add(calcBinom); add(solveBtn); add(tempumrechBtn); add(clearBtn); add(copyBtn); add(switchThemeBtn);
+        autoAusBtn = new JButton("Automatisch auswählen");
+        styleButton(autoAusBtn, new Color(100,100,100));
+
+        add(calcNormal); add(calcBinom); add(solveBtn); add(tempumrechBtn); add(clearBtn); add(copyBtn); add(autoAusBtn); add(switchThemeBtn);
 
         ergLabel = new JLabel("Ergebnis:");
         ergLabel.setForeground(Color.WHITE);
@@ -88,6 +91,18 @@ public class Main extends JFrame {
         });
         tempumrechBtn.addActionListener(e -> starteTemp());
         switchThemeBtn.addActionListener(e -> themeSwitch());
+        autoAusBtn.addActionListener(e -> autoauswahl());
+    }
+
+    private void autoauswahl() {
+        String text = inputField.getText().trim().toUpperCase();
+
+        if(text.endsWith("°F")) {
+            starteTemp();
+        }
+        else if(text.endsWith("°C")) {
+            starteTemp();
+        }
     }
 
     private void styleButton(JButton b, Color c) {
