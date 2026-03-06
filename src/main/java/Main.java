@@ -60,7 +60,7 @@ public class Main extends JFrame {
         switchThemeBtn = new JButton("Theme wechseln");
         styleButton(switchThemeBtn, new Color(52, 73, 94));
 
-        autoAusBtn = new JButton("Automatisch auswählen");
+        autoAusBtn = new JButton("Automatisch auswählen (geht noch nicht)");
         styleButton(autoAusBtn, new Color(100,100,100));
 
         add(calcNormal); add(calcBinom); add(solveBtn); add(tempumrechBtn); add(clearBtn); add(copyBtn); add(autoAusBtn); add(switchThemeBtn);
