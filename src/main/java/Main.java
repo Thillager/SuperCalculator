@@ -1,17 +1,25 @@
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
-import java.awt.event.*;
-import java.util.*;
-import java.util.regex.*;
-import java.io.*;
-import java.nio.file.*;
+import java.util.Arrays;
 import java.util.Locale;
-import java.net.URL;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 public class Main extends JFrame {
     private JTextField inputField;
-    private JButton calcBinom, calcNormal, solveBtn, clearBtn, copyBtn, tempumrechBtn, switchThemeBtn, autoAusBtn;
+    private JButton calcBinom, calcNormal, solveBtn, clearBtn, copyBtn, tempumrechBtn, switchThemeBtn, autoAusBtn, einheitBtn;
     private JTextField resultField;
     private JLabel ergLabel, label;
 
@@ -60,10 +68,13 @@ public class Main extends JFrame {
         switchThemeBtn = new JButton("Theme wechseln");
         styleButton(switchThemeBtn, new Color(52, 73, 94));
 
-        autoAusBtn = new JButton("Automatisch auswählen (geht noch nicht)");
+        autoAusBtn = new JButton("Automatisch auswählen (kann Fehler machen!)");
         styleButton(autoAusBtn, new Color(100,100,100));
 
-        add(calcNormal); add(calcBinom); add(solveBtn); add(tempumrechBtn); add(clearBtn); add(copyBtn); add(autoAusBtn); add(switchThemeBtn);
+        einheitBtn = new JButton("Mit Einheiten rechnen");
+        styleButton(einheitBtn, new Color(150, 75, 70));
+
+        add(calcNormal); add(calcBinom); add(solveBtn); add(tempumrechBtn); add(clearBtn); add(copyBtn); add(autoAusBtn); add(einheitBtn); add(switchThemeBtn);
 
         ergLabel = new JLabel("Ergebnis:");
         ergLabel.setForeground(Color.WHITE);
@@ -80,7 +91,7 @@ public class Main extends JFrame {
 
         // --- Action Listener ---
         calcNormal.addActionListener(e -> starteNormal());
-        inputField.addActionListener(e -> starteNormal());
+        inputField.addActionListener(e -> starteAuto());
         calcBinom.addActionListener(e -> starteBinom());
         solveBtn.addActionListener(e -> starteGleichung());
         clearBtn.addActionListener(e -> { inputField.setText(""); resultField.setText(""); });
@@ -91,11 +102,12 @@ public class Main extends JFrame {
         });
         tempumrechBtn.addActionListener(e -> starteTemp());
         switchThemeBtn.addActionListener(e -> themeSwitch());
-        autoAusBtn.addActionListener(e -> autoauswahl());
+        autoAusBtn.addActionListener(e -> starteAuto());
+        einheitBtn.addActionListener(e -> starteEinheitenRechner());
     }
 
-    private void autoauswahl() {
-        String text = inputField.getText().trim().toUpperCase();
+    private void starteAuto() {
+        String text = inputField.getText().trim();
 
         if(text.endsWith("°F")) {
             starteTemp();
@@ -103,7 +115,55 @@ public class Main extends JFrame {
         else if(text.endsWith("°C")) {
             starteTemp();
         }
+        else if(text.contains("=")) {
+            starteGleichung();
+        }
+        else if(text.matches(".*\\)\\s*\\^\\s*2$")) {
+            starteBinom();
+        }
+        else if(text.matches(".*\\d+(m|cm|mm|km).*")) {
+            starteEinheitenRechner();
+        }
+        else {
+            starteNormal();
+        }
     }
+
+    private void starteEinheitenRechner() {
+    String text = inputField.getText().toLowerCase().replaceAll("\\s+", "");
+    // Pattern sucht jetzt auch nach einem optionalen Minus vor der Zahl
+    Pattern pattern = Pattern.compile("([+-]?\\d+\\.?\\d*)(m|cm|mm|km)");
+    Matcher matcher = pattern.matcher(text);
+
+    double gesamtInMetern = 0;
+    boolean gefunden = false;
+
+    while (matcher.find()) {
+        try {
+            double wert = Double.parseDouble(matcher.group(1));
+            String einheit = matcher.group(2);
+            gefunden = true;
+
+            switch (einheit) {
+                case "km": gesamtInMetern += wert * 1000; break;
+                case "m":  gesamtInMetern += wert; break;
+                case "cm": gesamtInMetern += wert / 100.0; break;
+                case "mm": gesamtInMetern += wert / 1000.0; break;
+            }
+        } catch (NumberFormatException e) { /* Falls mal nur ein Vorzeichen gematcht wird */ }
+    }
+
+    if (gefunden) {
+        // Schlaue Ausgabe: Wenn Ergebnis sehr klein, zeige cm, sonst m
+        if (Math.abs(gesamtInMetern) < 1.0 && gesamtInMetern != 0) {
+            resultField.setText(String.format(Locale.US, "%.2f cm", gesamtInMetern * 100));
+        } else {
+            resultField.setText(String.format(Locale.US, "%.2f m", gesamtInMetern));
+        }
+    } else {
+        resultField.setText("Keine Einheiten zum Rechnen gefunden!");
+    }
+}
 
     private void styleButton(JButton b, Color c) {
         b.setBackground(c);
