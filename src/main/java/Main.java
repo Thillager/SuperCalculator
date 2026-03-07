@@ -184,6 +184,8 @@ public class Main extends JFrame {
         copyBtn.setForeground(color);
         tempumrechBtn.setForeground(color);
         switchThemeBtn.setForeground(color);
+        autoAusBtn.setForeground(color);
+        einheitBtn.setForeground(color);
     }
 
     private void themeSwitch() {
