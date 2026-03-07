@@ -5,7 +5,7 @@
     "main": "index.js",
     "preferGlobal": true,
     "repository": {"url": "https://github.com/Thillager/SuperCalculator"},
-    "version": "1.1.0",
+    "version": "1.1.1",
     "jdeploy": {
         "fallbackToUniversal": false,
         "generateLegacyBundles": false,
@@ -14,7 +14,7 @@
             "type": "GITHUB",
             "url": "https://github.com/Thillager/SuperCalculator"
         }],
-        "javaVersion": "21",
+        "javaVersion": "25",
         "jar": "build/libs/SuperCalculator-1.0-SNAPSHOT.jar",
         "title": "SuperCalculator",
         "platformBundlesEnabled": false,
