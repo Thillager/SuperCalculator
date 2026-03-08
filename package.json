@@ -15,7 +15,7 @@
             "url": "https://github.com/Thillager/SuperCalculator"
         }],
         "javaVersion": "25",
-        "jar": "build/libs/SuperCalculator-1.0-SNAPSHOT.jar",
+        "jar": "build/libs/SuperCalculator-2.0.0.jar",
         "title": "SuperCalculator",
         "platformBundlesEnabled": false,
         "downloadPage": {"platforms": ["default"]}
