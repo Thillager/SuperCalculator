@@ -19,9 +19,10 @@ import javax.swing.SwingUtilities;
 
 public class Main extends JFrame {
     private JTextField inputField;
-    private JButton calcBinom, calcNormal, solveBtn, clearBtn, copyBtn, tempumrechBtn, switchThemeBtn, autoAusBtn, einheitBtn;
+    private JButton calcBinom, calcNormal, solveBtn, clearBtn, copyBtn, tempumrechBtn, switchThemeBtn, autoAusBtn, einheitBtn, prozentBtn;
     private JTextField resultField;
     private JLabel ergLabel, label;
+    private String letzterBinomVerlauf = "";
 
     public Main() {
 
@@ -46,7 +47,7 @@ public class Main extends JFrame {
         inputField.setCaretColor(Color.WHITE);
         inputField.setFocusTraversalKeysEnabled(false);
 
-        // Buttons
+        // Buttons erstellen und stylen
         calcBinom = new JButton("Binomische Formel");
         styleButton(calcBinom, new Color(46, 204, 113));
 
@@ -74,8 +75,22 @@ public class Main extends JFrame {
         einheitBtn = new JButton("Mit Einheiten rechnen");
         styleButton(einheitBtn, new Color(150, 75, 70));
 
-        add(calcNormal); add(calcBinom); add(solveBtn); add(tempumrechBtn); add(clearBtn); add(copyBtn); add(autoAusBtn); add(einheitBtn); add(switchThemeBtn);
+        prozentBtn = new JButton("Mit Prozenten rechnen");
+        styleButton(prozentBtn, new Color(50, 10, 180));
 
+        // Buttons hinzufügen
+        add(calcNormal); 
+        add(calcBinom); 
+        add(solveBtn);
+        add(tempumrechBtn); 
+        add(einheitBtn); 
+        add(prozentBtn);
+        add(copyBtn); 
+        add(clearBtn); 
+        add(switchThemeBtn);
+        add(autoAusBtn);
+
+        // Ergebnis-Bereich
         ergLabel = new JLabel("Ergebnis:");
         ergLabel.setForeground(Color.WHITE);
         add(ergLabel);
@@ -96,17 +111,23 @@ public class Main extends JFrame {
         solveBtn.addActionListener(e -> starteGleichung());
         clearBtn.addActionListener(e -> { inputField.setText(""); resultField.setText(""); });
         copyBtn.addActionListener(e -> {
-            StringSelection sel = new StringSelection(resultField.getText());
+            String textZumKopieren = resultField.getText();
+            if (!letzterBinomVerlauf.isEmpty() && letzterBinomVerlauf.contains("Ergebnis: " + textZumKopieren)) {
+                textZumKopieren = letzterBinomVerlauf;
+            }
+            StringSelection sel = new StringSelection(textZumKopieren);
             Toolkit.getDefaultToolkit().getSystemClipboard().setContents(sel, sel);
-            JOptionPane.showMessageDialog(this, "Kopiert!");
+            JOptionPane.showMessageDialog(this, "Kopiert:\n" + textZumKopieren);
         });
         tempumrechBtn.addActionListener(e -> starteTemp());
         switchThemeBtn.addActionListener(e -> themeSwitch());
         autoAusBtn.addActionListener(e -> starteAuto());
         einheitBtn.addActionListener(e -> starteEinheitenRechner());
+        prozentBtn.addActionListener(e -> starteProzent());
     }
 
-    private void starteAuto() {
+
+private void starteAuto() {
         String text = inputField.getText().trim();
 
         if(text.endsWith("°F")) {
@@ -124,18 +145,61 @@ public class Main extends JFrame {
         else if(text.matches(".*\\d+(m|cm|mm|km).*")) {
             starteEinheitenRechner();
         }
+        else if(text.contains("%")) {
+            starteProzent();
+        }
         else {
             starteNormal();
         }
     }
 
+
+private void starteProzent() {
+    String text = inputField.getText().replace(",", ".").replaceAll("\\s+", "");
+    
+    // Pattern für "Zahl +/- Prozent%" (Kaufmännisch)
+    Pattern kaufmaennisch = Pattern.compile("(\\d+\\.?\\d*)([+-])(\\d+\\.?\\d*)%");
+    Matcher m1 = kaufmaennisch.matcher(text);
+    
+    // Pattern für "X% von Y" oder "X% * Y"
+    Pattern vonLogik = Pattern.compile("(\\d+\\.?\\d*)%(?:von|of|\\*)(\\d+\\.?\\d*)");
+    Matcher m2 = vonLogik.matcher(text);
+
+    try {
+        if (m1.find()) {
+            double basis = Double.parseDouble(m1.group(1));
+            String op = m1.group(2);
+            double prozent = Double.parseDouble(m1.group(3));
+            
+            double ergebnis = op.equals("+") ? basis * (1 + prozent/100) : basis * (1 - prozent/100);
+            resultField.setText(String.format(Locale.US, "%.2f", ergebnis));
+            
+        } else if (m2.find()) {
+            double prozent = Double.parseDouble(m2.group(1));
+            double wert = Double.parseDouble(m2.group(2));
+            
+            double ergebnis = (prozent / 100) * wert;
+            resultField.setText(String.format(Locale.US, "%.2f", ergebnis));
+            
+        } else if (text.contains("%")) {
+            // Einfache Umrechnung: "10%" -> 0.1
+            String zahlRaw = text.replace("%", "");
+            double zahl = Double.parseDouble(zahlRaw) / 100;
+            resultField.setText(String.format(Locale.US, "%.2f", zahl));
+        }
+    } catch (Exception e) {
+        resultField.setText("Prozent-Fehler!");
+    }
+}
+
     private void starteEinheitenRechner() {
-    String text = inputField.getText().toLowerCase().replaceAll("\\s+", "");
-    // Pattern sucht jetzt auch nach einem optionalen Minus vor der Zahl
-    Pattern pattern = Pattern.compile("([+-]?\\d+\\.?\\d*)(m|cm|mm|km)");
+    String text = inputField.getText().replace(",", ".").toLowerCase().replaceAll("\\s+", "");
+    
+    // Erweitertes Pattern: Erkennt nun m, cm, mm, km UND g, kg, t UND s, min, h
+    Pattern pattern = Pattern.compile("([+-]?\\d+\\.?\\d*)(mm|cm|m|km|g|kg|t|min|h|s)");
     Matcher matcher = pattern.matcher(text);
 
-    double gesamtInMetern = 0;
+    double m = 0, g = 0, s = 0; // Basiseinheiten: Meter, Gramm, Sekunden
     boolean gefunden = false;
 
     while (matcher.find()) {
@@ -145,36 +209,67 @@ public class Main extends JFrame {
             gefunden = true;
 
             switch (einheit) {
-                case "km": gesamtInMetern += wert * 1000; break;
-                case "m":  gesamtInMetern += wert; break;
-                case "cm": gesamtInMetern += wert / 100.0; break;
-                case "mm": gesamtInMetern += wert / 1000.0; break;
+                // Längen (Basis: Meter)
+                case "km": m += wert * 1000; break;
+                case "m":  m += wert; break;
+                case "cm": m += wert / 100.0; break;
+                case "mm": m += wert / 1000.0; break;
+                
+                // Gewichte (Basis: Gramm)
+                case "t":  g += wert * 1000000; break;
+                case "kg": g += wert * 1000; break;
+                case "g":  g += wert; break;
+                
+                // Zeit (Basis: Sekunden)
+                case "h":   s += wert * 3600; break;
+                case "min": s += wert * 60; break;
+                case "s":   s += wert; break;
             }
-        } catch (NumberFormatException e) { /* Falls mal nur ein Vorzeichen gematcht wird */ }
+        } catch (NumberFormatException e) { }
     }
 
     if (gefunden) {
-        // Schlaue Ausgabe: Wenn Ergebnis sehr klein, zeige cm, sonst m
-        if (Math.abs(gesamtInMetern) < 1.0 && gesamtInMetern != 0) {
-            resultField.setText(String.format(Locale.US, "%.2f cm", gesamtInMetern * 100));
-        } else {
-            resultField.setText(String.format(Locale.US, "%.2f m", gesamtInMetern));
-        }
+        StringBuilder erg = new StringBuilder();
+        if (m != 0) erg.append(formatEinheit(m, "m")).append(" ");
+        if (g != 0) erg.append(formatEinheit(g, "g")).append(" ");
+        if (s != 0) erg.append(formatEinheit(s, "s")).append(" ");
+        
+        resultField.setText(erg.toString().trim());
     } else {
-        resultField.setText("Keine Einheiten zum Rechnen gefunden!");
+        resultField.setText("Keine Einheiten (m, g, s etc.) gefunden!");
     }
+    }
+
+private String formatEinheit(double wert, String typ) {
+    if (typ.equals("m")) {
+        if (Math.abs(wert) >= 1000) return String.format(Locale.US, "%.2f km", wert / 1000);
+        if (Math.abs(wert) < 1.0 && wert != 0) return String.format(Locale.US, "%.2f cm", wert * 100);
+        return String.format(Locale.US, "%.2f m", wert);
+    } 
+    if (typ.equals("g")) {
+        if (Math.abs(wert) >= 1000000) return String.format(Locale.US, "%.2f t", wert / 1000000);
+        if (Math.abs(wert) >= 1000) return String.format(Locale.US, "%.2f kg", wert / 1000);
+        return String.format(Locale.US, "%.2f g", wert);
+    }
+    if (typ.equals("s")) {
+        if (Math.abs(wert) >= 3600) return String.format(Locale.US, "%.2f h", wert / 3600);
+        if (Math.abs(wert) >= 60) return String.format(Locale.US, "%.2f min", wert / 60);
+        return String.format(Locale.US, "%.2f s", wert);
+    }
+    return "";
 }
 
     private void styleButton(JButton b, Color c) {
-        b.setBackground(c);
-        if (getContentPane().getBackground() == Color.BLACK) {
-            b.setForeground(Color.WHITE);
-        } else {
-            b.setForeground(Color.BLACK);
-        }
-        b.setFocusPainted(false); b.setFont(new Font("Arial", Font.BOLD, 12));
-        b.setFocusable(false);
+    b.setBackground(c);
+    if (getContentPane().getBackground() == Color.BLACK) {
+        b.setForeground(Color.WHITE);
+    } else {
+        b.setForeground(Color.BLACK);
     }
+    b.setFocusPainted(false); 
+    b.setFont(new Font("Arial", Font.BOLD, 12));
+    b.setFocusable(false);
+}
 
     private void updateButtonTextColors(Color color) {
         calcBinom.setForeground(color);
@@ -186,6 +281,7 @@ public class Main extends JFrame {
         switchThemeBtn.setForeground(color);
         autoAusBtn.setForeground(color);
         einheitBtn.setForeground(color);
+        prozentBtn.setForeground(color);
     }
 
     private void themeSwitch() {
@@ -238,20 +334,96 @@ public class Main extends JFrame {
         } catch (Exception e) { resultField.setText("Syntax-Fehler!"); }
     }
 
-    private void starteBinom() {
-        try {
-            String input = inputField.getText().trim();
-            if (input.endsWith("^2")) {
-                input = input.substring(0, input.length() - 2).trim();
+private void starteBinom() {
+    try {
+        String input = inputField.getText().trim();
+        
+        // 1. Säubern: (a+b)^2 -> a+b
+        if (input.endsWith("^2")) input = input.substring(0, input.length() - 2).trim();
+        if (input.startsWith("(") && input.endsWith(")")) input = input.substring(1, input.length() - 1).trim();
+
+        Polynomial polyA = new Polynomial();
+        Polynomial polyB = new Polynomial();
+
+        // 2. Splitting-Logik: Wir suchen das Trennzeichen (+ oder -), um a und b zu trennen
+        // Das Regex sucht ein + oder - das NICHT am Anfang steht
+        String[] parts = input.split("(?<=\\d|[a-zA-Z])(?=[+-])|(?<=[+-])(?=\\d|[a-zA-Z])");
+
+        if (parts.length >= 2) {
+            // Wir nehmen den Teil vor dem Operator und den Teil danach (inkl. Operator als Vorzeichen)
+            // Beispiel: "25+5" -> polyA = 25, polyB = 5
+            // Beispiel: "x-7" -> polyA = x, polyB = -7
+            
+            int opIndex = -1;
+            for(int i=0; i < parts.length; i++) {
+                if(parts[i].equals("+") || parts[i].equals("-")) {
+                    opIndex = i;
+                    break;
+                }
             }
-            if (input.startsWith("(") && input.endsWith(")")) {
-                input = input.substring(1, input.length() - 1).trim();
+
+            if (opIndex != -1) {
+                // Alles vor dem Operator ist a
+                StringBuilder sbA = new StringBuilder();
+                for(int i=0; i < opIndex; i++) sbA.append(parts[i]);
+                polyA = new Parser(vorbereiten(sbA.toString())).parse();
+
+                // Alles ab dem Operator (inklusive) ist b
+                StringBuilder sbB = new StringBuilder();
+                for(int i=opIndex; i < parts.length; i++) sbB.append(parts[i]);
+                polyB = new Parser(vorbereiten(sbB.toString())).parse();
+            } else {
+                // Fallback, falls kein klarer Operator gefunden wurde
+                Polynomial p = new Parser(vorbereiten(input)).parse();
+                Object[] keys = p.terms.keySet().toArray();
+                if(keys.length > 1) {
+                    polyA = new Polynomial(p.terms.get(keys[1]), (String)keys[1]);
+                    polyB = new Polynomial(p.terms.get(keys[0]), (String)keys[0]);
+                } else {
+                    polyA = p;
+                    polyB = new Polynomial(0, "");
+                }
             }
-            Polynomial p = new Parser(vorbereiten(input)).parse();
-            Polynomial res = p.mul(p);
-            resultField.setText(res.toString());
-        } catch (Exception e) { resultField.setText("Format: (a+b)^2"); }
+        } else {
+            // Nur ein Term vorhanden (z.B. (30)^2)
+            polyA = new Parser(vorbereiten(input)).parse();
+            polyB = new Polynomial(0, "");
+        }
+
+        // 3. Teilschritte berechnen
+        Polynomial a2 = polyA.mul(polyA);
+        Polynomial b2 = polyB.mul(polyB);
+        Polynomial zweiAB = polyA.mul(polyB).mul(new Polynomial(2, ""));
+        
+        // Endergebnis: (a+b)*(a+b)
+        Polynomial summe = polyA.add(polyB);
+        Polynomial ergebnis = summe.mul(summe);
+
+        // 4. Speicher für Kopieren-Button (Plain Text)
+        letzterBinomVerlauf = String.format("a=%s, b=%s | a²=%s, 2ab=%s, b²=%s | Ergebnis: %s", 
+                                            polyA, polyB, a2, zweiAB, b2, ergebnis);
+
+        // 5. Anzeige im resultField
+        resultField.setText(ergebnis.toString());
+
+        // 6. Anzeige im Popup (HTML für Zeilenumbrüche)
+        String html = "<html><body style='font-family:Arial; padding:5px;'>" +
+                      "<b style='color:#2ecc71;'>Binomische Zerlegung:</b><br><hr>" +
+                      "a &nbsp;&nbsp;&nbsp;= " + polyA + "<br>" +
+                      "b &nbsp;&nbsp;&nbsp;= " + polyB + "<br><br>" +
+                      "a² &nbsp;&nbsp;= " + a2 + "<br>" +
+                      "2ab = " + zweiAB + "<br>" +
+                      "b² &nbsp;&nbsp;= " + b2 + "<br><hr>" +
+                      "<b>Ergebnis: " + ergebnis + "</b>" +
+                      "</body></html>";
+
+        JOptionPane.showMessageDialog(this, html, "Rechenweg", JOptionPane.INFORMATION_MESSAGE);
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        resultField.setText("Fehler: Nutze (a+b)^2");
     }
+}
 
     private void starteGleichung() {
         try {
@@ -286,14 +458,44 @@ public class Main extends JFrame {
         } catch (Exception e) { resultField.setText("Fehler in der Gleichung!"); }
     }
 
-    private String vorbereiten(String s) {
-        return s.replaceAll("(\\d)([a-zA-Z])", "$1*$2")
-                .replaceAll("(\\d)(\\()", "$1*$2")
-                .replaceAll("([a-zA-Z])(\\()", "$1*$2")
-                .replaceAll("(\\))(\\d)", "$1*$2")
-                .replaceAll("(\\))([a-zA-Z])", "$1*$2")
-                .replaceAll("(\\))(\\()", "$1*$2");
+private String vorbereiten(String s) {
+    if (s == null || s.isEmpty()) return "0";
+
+    // 1. Grundreinigung
+    s = s.toLowerCase().replace(",", ".").replaceAll("\\s+", "");
+
+    // 2. Google-Logik: Erkennt "100 + 10%" und macht daraus "100 * (1 + 10/100)"
+    Pattern p = Pattern.compile("(\\d+\\.?\\d*)([+-])(\\d+\\.?\\d*)%");
+    Matcher m = p.matcher(s);
+    StringBuilder sb = new StringBuilder();
+    int lastEnd = 0;
+    while (m.find()) {
+        sb.append(s, lastEnd, m.start());
+        String basis = m.group(1);
+        String op = m.group(2);
+        String prozent = m.group(3);
+        
+        if (op.equals("+")) {
+            sb.append(basis).append("*(1+").append(prozent).append("/100)");
+        } else {
+            sb.append(basis).append("*(1-").append(prozent).append("/100) ");
+        }
+        lastEnd = m.end();
     }
+    sb.append(s.substring(lastEnd));
+    s = sb.toString();
+
+    // 3. Restliche Ersetzungen (Prozent ohne Vorzeichen & Wörter)
+    s = s.replace("von", "*").replace("of", "*").replace("%", "/100");
+
+    // 4. Mathematische Verschönerung (2x -> 2*x etc.)
+    return s.replaceAll("(\\d)([a-zA-Z])", "$1*$2")
+            .replaceAll("(\\d)(\\()", "$1*$2")
+            .replaceAll("([a-zA-Z])(\\()", "$1*$2")
+            .replaceAll("(\\))(\\d)", "$1*$2")
+            .replaceAll("(\\))([a-zA-Z])", "$1*$2")
+            .replaceAll("(\\))(\\()", "$1*$2");
+}
 
     // --- ALGEBRA LOGIK ---
     static class Polynomial {
