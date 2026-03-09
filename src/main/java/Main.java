@@ -20,7 +20,7 @@ import javax.swing.SwingUtilities;
 
 public class Main extends JFrame {
     private JTextField inputField;
-    private JButton calcBinom, calcNormal, solveBtn, clearBtn, copyBtn, tempumrechBtn, switchThemeBtn, autoAusBtn, einheitBtn, prozentBtn;
+    private JButton calcBinom, calcNormal, solveBtn, clearBtn, copyBtn, tempumrechBtn, switchThemeBtn, autoAusBtn, einheitBtn, prozentBtn, wurzelBtn;
     private JTextField resultField;
     private JLabel ergLabel, label;
     private String letzterBinomVerlauf = "";
@@ -79,6 +79,9 @@ public class Main extends JFrame {
         prozentBtn = new JButton("Mit Prozenten rechnen");
         styleButton(prozentBtn, new Color(50, 10, 180));
 
+        wurzelBtn = new JButton("Starte mit Wurzeleingabe");
+        styleButton(wurzelBtn, new Color(13, 90, 70));
+
         // Buttons hinzufügen
         add(calcNormal); 
         add(calcBinom); 
@@ -90,6 +93,7 @@ public class Main extends JFrame {
         add(clearBtn); 
         add(switchThemeBtn);
         add(autoAusBtn);
+        add(wurzelBtn);
 
         // Ergebnis-Bereich
         ergLabel = new JLabel("Ergebnis:");
@@ -125,6 +129,8 @@ public class Main extends JFrame {
         autoAusBtn.addActionListener(e -> starteAuto());
         einheitBtn.addActionListener(e -> starteEinheitenRechner());
         prozentBtn.addActionListener(e -> starteProzent());
+        wurzelBtn.addActionListener(e -> starteWurzel()
+);
     }
 
 
@@ -153,6 +159,11 @@ private void starteAuto() {
             starteNormal();
         }
     }
+
+private void starteWurzel() {
+            inputField.setText(inputField.getText() + "√(");
+            inputField.requestFocus();
+}
 
 
 private void starteProzent() {
@@ -489,6 +500,8 @@ private String vorbereiten(String s) {
     // 3. Restliche Ersetzungen (Prozent ohne Vorzeichen & Wörter)
     s = s.replace("von", "*").replace("of", "*").replace("%", "/100");
 
+    s = s.replace("sqrt*(", "sqrt(");
+
     // 4. Mathematische Verschönerung (2x -> 2*x etc.)
     return s.replaceAll("(\\d)([a-zA-Z])", "$1*$2")
             .replaceAll("(\\d)(\\()", "$1*$2")
@@ -578,22 +591,55 @@ private String vorbereiten(String s) {
             return base;
         }
 
-        Polynomial fact(){
-            if(eat('+')) return fact();
-            if(eat('-')) return fact().mul(new Polynomial(-1,""));
+        Polynomial fact() {
+    if (eat('+')) return fact(); // ignoriert führendes Plus
+    if (eat('-')) return fact().mul(new Polynomial(-1, "")); // Vorzeichen-Wechsel
 
-            Polynomial x;
-            if(eat('(')){ x=sum(); eat(')'); }
-            else{
-                StringBuilder sb=new StringBuilder();
-                while(Character.isDigit(ch)||ch=='.'){ sb.append((char)ch); next(); }
-                double n=sb.length()>0?Double.parseDouble(sb.toString()):1;
-                StringBuilder v=new StringBuilder();
-                while(Character.isLetter(ch)){ v.append((char)ch); next(); }
-                x=new Polynomial(n, v.toString());
+    Polynomial x;
+    
+    // 1. Klammern zuerst: ( ... )
+    if (eat('(')) { 
+        x = sum(); 
+        eat(')'); 
+    } 
+    // 2. Funktionen oder Variablen: sqrt(...) oder x
+    else if ((ch >= 'a' && ch <= 'z') || ch == '√') {
+        StringBuilder func = new StringBuilder();
+        
+        // Sonderfall für das √ Zeichen
+        if (ch == '√') {
+            next();
+            func.append("sqrt");
+        } else {
+            while (ch >= 'a' && ch <= 'z') {
+                func.append((char) ch);
+                next();
             }
-            return x;
         }
+
+        // Wenn es 'sqrt' ist und eine Klammer folgt
+        if (func.toString().equals("sqrt") && eat('(')) {
+            x = sum();
+            eat(')');
+            double val = x.terms.getOrDefault("", 0.0);
+            x = new Polynomial(Math.sqrt(val), "");
+        } else {
+            // Es ist eine normale Variable, z.B. 'x' oder 'y'
+            x = new Polynomial(1, func.toString());
+        }
+    } 
+    // 3. Reine Zahlen
+    else {
+        StringBuilder sb = new StringBuilder();
+        while (Character.isDigit(ch) || ch == '.') { 
+            sb.append((char) ch); 
+            next(); 
+        }
+        double n = sb.length() > 0 ? Double.parseDouble(sb.toString()) : 1;
+        x = new Polynomial(n, "");
+    }
+    return x;
+}
     }
 
     public static void main(String[] args){ SwingUtilities.invokeLater(() -> new Main().setVisible(true)); }
