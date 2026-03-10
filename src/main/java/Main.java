@@ -364,7 +364,7 @@ public class Main extends JFrame {
         tempumrechBtn.addActionListener(e -> starteTemp());
         einheitBtn.addActionListener(e -> starteEinheitenRechner());
         prozentBtn.addActionListener(e -> starteProzent());
-        wurzelBtn.addActionListener(e -> { inputField.setText(inputField.getText() + "sqrt("); inputField.requestFocus(); });
+        wurzelBtn.addActionListener(e -> { inputField.setText(inputField.getText() + "√("); inputField.requestFocus(); });
         copyBtn.addActionListener(e -> {
             Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(resultField.getText()), null);
             JOptionPane.showMessageDialog(this, isEnglish ? "Copied!" : "Kopiert!");
