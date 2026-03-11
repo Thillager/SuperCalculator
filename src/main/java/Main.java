@@ -1,5 +1,6 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -23,25 +24,34 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 
 public class Main extends JFrame {
     private JTextField inputField, resultField;
-    private JButton calcBinom, calcNormal, solveBtn, clearBtn, copyBtn, tempumrechBtn, switchThemeBtn, autoAusBtn, einheitBtn, prozentBtn, wurzelBtn, extendedBtn, langBtn, speakBtn, simulationBtn;
+    private JButton calcBinom, calcNormal, solveBtn, clearBtn, copyBtn, tempumrechBtn, switchThemeBtn, autoAusBtn, einheitBtn, prozentBtn, wurzelBtn, extendedBtn, langBtn, speakBtn, simulationBtn, simulationStopBtn;
     private JLabel ergLabel, label;
     private boolean isExtended = false;
     private boolean isEnglish = false;
     private Map<String, String[]> texts = new HashMap<>();
-    private JPanel sideBar;
+    private JPanel sideBar, topBar;
+        
+    // Simulation
+    int aktuellerVersuch = 0;
+    int trefferLive = 0;
+    Timer simulationTimer;
 
     public Main() {
         setTitle("Super Taschenrechner");
-        setSize(750, 550);
+        setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getContentPane().setBackground(Color.BLACK);
-        setLayout(new BorderLayout(10, 10));
+        
+        // Wichtig: Layout erst setzen, dann Komponenten initialisieren
+        setLayout(new BorderLayout());
 
         initTexts();
-        initializeUI();
+        initComponents(); // Erstellt alle Button-Objekte
+        initializeUI();   // Baut die Panels zusammen
         setupListeners();
     }
 
@@ -63,6 +73,105 @@ public class Main extends JFrame {
         texts.put("speak", new String[]{"Vorlesen", "Speak"});
     }
 
+    private void initComponents() {
+        // Alle Buttons erstellen, bevor sie Panels hinzugefügt werden
+        calcNormal = new JButton(); styleButton(calcNormal, new Color(52, 152, 219));
+        calcBinom = new JButton(); styleButton(calcBinom, new Color(46, 204, 113));
+        solveBtn = new JButton(); styleButton(solveBtn, new Color(155, 89, 182));
+        tempumrechBtn = new JButton(); styleButton(tempumrechBtn, new Color(243, 156, 18));
+        einheitBtn = new JButton(); styleButton(einheitBtn, new Color(150, 75, 70));
+        prozentBtn = new JButton(); styleButton(prozentBtn, new Color(50, 10, 180));
+        copyBtn = new JButton(); styleButton(copyBtn, new Color(149, 165, 166));
+        clearBtn = new JButton(); styleButton(clearBtn, new Color(231, 76, 60));
+        switchThemeBtn = new JButton(); styleButton(switchThemeBtn, new Color(52, 73, 94));
+        autoAusBtn = new JButton("Auto"); styleButton(autoAusBtn, new Color(100, 100, 100));
+        wurzelBtn = new JButton("√"); styleButton(wurzelBtn, new Color(13, 90, 70));
+        extendedBtn = new JButton(); styleButton(extendedBtn, new Color(37, 89, 69));
+        langBtn = new JButton(); styleButton(langBtn, new Color(100, 50, 150));
+        speakBtn = new JButton(); styleButton(speakBtn, new Color(41, 128, 185));
+        simulationBtn = new JButton("Simulation"); styleButton(simulationBtn, new Color(22, 160, 133));
+        simulationStopBtn = new JButton("Stop simulation"); styleButton(simulationStopBtn, new Color(192, 57, 43));
+
+        label = new JLabel(""); label.setForeground(Color.WHITE);
+        ergLabel = new JLabel(""); ergLabel.setForeground(Color.WHITE);
+        
+        inputField = new JTextField(30); 
+        inputField.setBackground(Color.BLACK); 
+        inputField.setForeground(Color.WHITE); 
+        inputField.setCaretColor(Color.WHITE);
+
+        resultField = new JTextField("", 40); 
+        resultField.setEditable(false); 
+        resultField.setBorder(null); 
+        resultField.setBackground(null);
+        resultField.setHorizontalAlignment(JTextField.CENTER);
+        resultField.setFont(new Font("Monospaced", Font.BOLD, 22)); 
+        resultField.setForeground(Color.WHITE);
+    }
+
+    private void initializeUI() {
+        // 1. SIDEBAR (Links, volle Höhe)
+        sideBar = new JPanel();
+        sideBar.setLayout(new BoxLayout(sideBar, BoxLayout.Y_AXIS));
+        sideBar.setBackground(Color.BLACK);
+        sideBar.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        sideBar.setPreferredSize(new Dimension(180, 600));
+
+        sideBar.add(extendedBtn);
+        extendedBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        sideBar.add(Box.createVerticalStrut(15));
+        
+        for (JButton b : extendedList()) {
+            b.setVisible(false);
+            b.setMaximumSize(new Dimension(160, 30));
+            b.setAlignmentX(Component.CENTER_ALIGNMENT);
+            sideBar.add(b);
+            sideBar.add(Box.createVerticalStrut(5));
+        }
+
+        // 2. TOPBAR (Oben rechts im Center-Bereich)
+        topBar = new JPanel();
+        topBar.setLayout(new BoxLayout(topBar, BoxLayout.X_AXIS));
+        topBar.setBackground(Color.BLACK);
+        topBar.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        
+        topBar.add(Box.createHorizontalGlue()); // Schiebt Buttons nach rechts
+        topBar.add(langBtn);
+        topBar.add(Box.createHorizontalStrut(10));
+        topBar.add(switchThemeBtn);
+
+        // 3. MAIN CONTENT (Mitte)
+        JPanel mainPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 15));
+        mainPanel.setBackground(Color.BLACK);
+        mainPanel.add(label);
+        mainPanel.add(inputField);
+        mainPanel.add(autoAusBtn);
+        mainPanel.add(copyBtn);
+        mainPanel.add(clearBtn);
+        mainPanel.add(speakBtn);
+        mainPanel.add(ergLabel);
+        mainPanel.add(resultField);
+
+        // 4. WRAPPER (Kombiniert TopBar und MainPanel)
+        JPanel centerWrapper = new JPanel(new BorderLayout());
+        centerWrapper.setBackground(Color.BLACK);
+        centerWrapper.add(topBar, BorderLayout.NORTH);
+        centerWrapper.add(mainPanel, BorderLayout.CENTER);
+
+        centerWrapper.add(mainPanel, BorderLayout.CENTER);
+
+        // Alles dem Frame hinzufügen
+        add(sideBar, BorderLayout.WEST);
+        add(centerWrapper, BorderLayout.CENTER);
+
+        updateLanguage();
+    }
+
+    private void styleButton(JButton b, Color c) {
+        b.setBackground(c); b.setForeground(Color.WHITE); b.setFocusPainted(false);
+        b.setFont(new Font("Arial", Font.BOLD, 12)); b.setFocusable(false);
+    }
+
     private void updateLanguage() {
         int idx = isEnglish ? 1 : 0;
         label.setText(texts.get("task")[idx]);
@@ -80,10 +189,56 @@ public class Main extends JFrame {
         langBtn.setText(isEnglish ? "DE" : "EN");
         speakBtn.setText(texts.get("speak")[idx]);
 
-        if (resultField.getText().contains("Warte") || resultField.getText().contains("Waiting")) {
+        if (resultField.getText().isEmpty() || resultField.getText().contains("Warte") || resultField.getText().contains("Waiting")) {
             resultField.setText(texts.get("wait")[idx]);
         }
     }
+
+    private void setupListeners() {
+        calcNormal.addActionListener(e -> starteNormal());
+        inputField.addActionListener(e -> starteAuto());
+        calcBinom.addActionListener(e -> starteBinom());
+        solveBtn.addActionListener(e -> starteGleichung());
+        clearBtn.addActionListener(e -> { 
+            inputField.setText(""); 
+            resultField.setText(texts.get("wait")[isEnglish ? 1 : 0]); 
+        });
+        tempumrechBtn.addActionListener(e -> starteTemp());
+        einheitBtn.addActionListener(e -> starteEinheitenRechner());
+        prozentBtn.addActionListener(e -> starteProzent());
+        wurzelBtn.addActionListener(e -> { 
+            inputField.setText(inputField.getText() + "√("); 
+            inputField.requestFocus(); 
+        });
+        copyBtn.addActionListener(e -> { 
+            Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(resultField.getText()), null); 
+            JOptionPane.showMessageDialog(this, isEnglish ? "Copied!" : "Kopiert!"); 
+        });
+        switchThemeBtn.addActionListener(e -> themeSwitch());
+        autoAusBtn.addActionListener(e -> starteAuto());
+        langBtn.addActionListener(e -> { isEnglish = !isEnglish; updateLanguage(); });
+        extendedBtn.addActionListener(e -> {
+            isExtended = !isExtended;
+            for (JButton b : extendedList()) b.setVisible(isExtended);
+            sideBar.setBorder(isExtended ? BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 0, 0, 1, Color.GRAY), 
+                BorderFactory.createEmptyBorder(10, 10, 10, 10)) : BorderFactory.createEmptyBorder(10, 10, 10, 10));
+            updateLanguage(); revalidate(); repaint();
+        });
+        speakBtn.addActionListener(e -> vorlesen(resultField.getText()));
+        simulationBtn.addActionListener(e -> simulation());
+        simulationStopBtn.addActionListener(e -> {
+            if (simulationTimer != null && simulationTimer.isRunning()) {
+                simulationTimer.stop();
+            }
+        });
+    }
+
+    private JButton[] extendedList() { 
+        return new JButton[]{tempumrechBtn, einheitBtn, prozentBtn, wurzelBtn, calcBinom, solveBtn, calcNormal, simulationBtn, simulationStopBtn}; 
+    }
+
+    // --- RECHENLOGIK & HELPER ---
 
     private String basisBereinigung(String s) {
         if (s == null) return "";
@@ -93,8 +248,6 @@ public class Main extends JFrame {
     private String vorbereiten(String s) {
         s = basisBereinigung(s);
         if (s.isEmpty()) return "0";
-
-        // Prozentrechnung
         Pattern p = Pattern.compile("(\\d+\\.?\\d*)([+-])(\\d+\\.?\\d*)%");
         Matcher m = p.matcher(s);
         StringBuilder sb = new StringBuilder();
@@ -105,22 +258,11 @@ public class Main extends JFrame {
             lastEnd = m.end();
         }
         sb.append(s.substring(lastEnd));
-        s = sb.toString().replace("von", "*").replace("of", "*").replace("%", "/100");
-
-        // 1. Alle "sqrt" in "√" umwandeln, das macht den Parser VIEL einfacher
-        s = s.replace("sqrt", "√");
-
-        // 2. Automatische Multiplikation
-        s = s.replaceAll("(\\d)([a-zA-Z])", "$1*$2")
-             .replaceAll("(\\d)(\\()", "$1*$2")
-             .replaceAll("([a-zA-Z])(\\()", "$1*$2")
-             .replaceAll("(\\))(\\d)", "$1*$2")
-             .replaceAll("(\\))([a-zA-Z])", "$1*$2")
-             .replaceAll("(\\))(\\()", "$1*$2");
-
-        // 3. Fall: Jemand tippt "2√9". Daraus muss "2*√9" werden!
-        s = s.replaceAll("(\\d)(√)", "$1*$2");
-
+        s = sb.toString().replace("von", "*").replace("of", "*").replace("%", "/100").replace("sqrt", "√");
+        s = s.replaceAll("(\\d)([a-zA-Z])", "$1*$2").replaceAll("(\\d)(\\()", "$1*$2")
+             .replaceAll("([a-zA-Z])(\\()", "$1*$2").replaceAll("(\\))(\\d)", "$1*$2")
+             .replaceAll("(\\))([a-zA-Z])", "$1*$2").replaceAll("(\\))(\\()", "$1*$2")
+             .replaceAll("(\\d)(√)", "$1*$2");
         return s;
     }
 
@@ -133,8 +275,7 @@ public class Main extends JFrame {
         String text = inputField.getText().trim();
         String clean = basisBereinigung(text);
         if (text.contains("=")) starteGleichung();
-        else if (clean.contains("/") && (clean.contains("%") || clean.contains("prozent")))
-        starteBruchZuProzent();
+        else if (clean.contains("/") && (clean.contains("%") || clean.contains("prozent"))) starteBruchZuProzent();
         else if (clean.matches(".*\\d+(mm|cm|km|m|kg|g|t|min|h|s).*")) starteEinheitenRechner();
         else if (clean.matches(".*[°]?f$|.*[°]?c$")) starteTemp();
         else starteNormal();
@@ -148,86 +289,62 @@ public class Main extends JFrame {
     }
 
     private void simulation() {
-        String text = basisBereinigung(inputField.getText());
-
-        try{
-        String [] teile = text.split("%");
-        double p = Double.parseDouble(teile[0]) / 100.0;
-        int versuche = Integer.parseInt(teile[1]);
-
-        int erfolge = 0;
-        for (int i = 0; i < versuche; i++) {
-            if (Math.random() < p) erfolge++;
-
-            resultField.setText(erfolge + " von " + versuche);
-        }
-    } catch (Exception e) { resultField.setText("Error!"); return; }
-
+        try {
+            String text = basisBereinigung(inputField.getText());
+            String[] teile = text.split("%");
+            double p = Double.parseDouble(teile[0]) / 100.0;
+            int versuche = Integer.parseInt(teile[1]);
+            aktuellerVersuch = 0; trefferLive = 0;
+            
+            if (simulationTimer != null) simulationTimer.stop();
+            simulationTimer = new Timer(10, e -> {
+                if (aktuellerVersuch < versuche) {
+                    if (Math.random() < p) trefferLive++;
+                    aktuellerVersuch++;
+                    resultField.setText(trefferLive + "/" + aktuellerVersuch + " von " + versuche + " (" + formatZahl((double) trefferLive / aktuellerVersuch * 100) + "%)");
+                } else {
+                    ((Timer) e.getSource()).stop();
+                }
+            });
+            simulationTimer.start();
+        } catch (Exception e) { resultField.setText("Error!"); }
     }
-
 
     private void starteBruchZuProzent() {
         try {
-        String text = basisBereinigung(inputField.getText());
-
-        String[] teile = text.split("/");
-        double zaehler = Double.parseDouble(teile[0].replaceAll("[^0-9.-]", ""));
-        double nenner = Double.parseDouble(teile[1].replaceAll("[^0-9.-]", ""));
-
-        double prozent = (zaehler / nenner) * 100;
-        resultField.setText(formatZahl(prozent) + "%");
-    } 
-    catch (Exception e) { resultField.setText("Error!"); 
-
-        }
+            String text = basisBereinigung(inputField.getText());
+            String[] teile = text.split("/");
+            double zaehler = Double.parseDouble(teile[0].replaceAll("[^0-9.-]", ""));
+            double nenner = Double.parseDouble(teile[1].replaceAll("[^0-9.-]", ""));
+            resultField.setText(formatZahl((zaehler / nenner) * 100) + "%");
+        } catch (Exception e) { resultField.setText("Error!"); }
     }
 
     private void vorlesen(String text) {
-    if (text == null || text.isEmpty() || text.contains("Warte") || text.contains("Waiting")) return;
-
-    String sprechText = text.replace("=", " ist gleich ")
-                            .replace("*", " mal ")
-                            .replace("/", " geteilt durch ")
-                            .replace("√", " Wurzel aus ");
-
-    new Thread(() -> {
-        try {
-            String os = System.getProperty("os.name").toLowerCase();
-            if (os.contains("win")) {
-                // WINDOWS LOGIK
-                // Wir suchen nach einer Stimme, die zur gewählten Sprache passt
-                String langTag = isEnglish ? "en" : "de";
-                
-                String shellCommand = "Add-Type -AssemblyName System.Speech; " +
-                        "$synth = New-Object System.Speech.Synthesis.SpeechSynthesizer; " +
-                        // Suche eine Stimme, die das Sprachkürzel (de oder en) im Namen oder Attribut hat
-                        "$voice = $synth.GetInstalledVoices() | Where-Object { $_.VoiceInfo.Culture.TwoLetterISOLanguageName -eq '" + langTag + "' } | Select-Object -First 1; " +
-                        "if ($voice) { $synth.SelectVoice($voice.VoiceInfo.Name); } " +
-                        "$synth.Speak('" + sprechText + "')";
-                
-                new ProcessBuilder("powershell", "-Command", shellCommand).start();
-                
-            } else if (os.contains("mac")) {
-                // MAC LOGIK
-                // Anna ist die deutsche Standardstimme, Samantha die englische
-                String voice = isEnglish ? "Samantha" : "Anna";
-                new ProcessBuilder("say", "-v", voice, sprechText).start();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }).start();
-}
+        if (text == null || text.isEmpty() || text.contains("Warte")) return;
+        String sprechText = text.replace("=", " ist gleich ").replace("*", " mal ").replace("/", " geteilt durch ").replace("√", " Wurzel aus ");
+        new Thread(() -> {
+            try {
+                String os = System.getProperty("os.name").toLowerCase();
+                if (os.contains("win")) {
+                    String langTag = isEnglish ? "en" : "de";
+                    String cmd = "Add-Type -AssemblyName System.Speech; $synth = New-Object System.Speech.Synthesis.SpeechSynthesizer; " +
+                                 "$voice = $synth.GetInstalledVoices() | Where-Object { $_.VoiceInfo.Culture.TwoLetterISOLanguageName -eq '" + langTag + "' } | Select-Object -First 1; " +
+                                 "if ($voice) { $synth.SelectVoice($voice.VoiceInfo.Name); } $synth.Speak('" + sprechText + "')";
+                    new ProcessBuilder("powershell", "-Command", cmd).start();
+                } else if (os.contains("mac")) {
+                    new ProcessBuilder("say", "-v", isEnglish ? "Samantha" : "Anna", sprechText).start();
+                }
+            } catch (Exception e) { e.printStackTrace(); }
+        }).start();
+    }
 
     private void starteEinheitenRechner() {
         String text = basisBereinigung(inputField.getText());
-        text = text.replaceAll("(\\d+\\.?\\d*)km", "($1*1000)m")
-                   .replaceAll("(\\d+\\.?\\d*)cm", "($1*0.01)m")
-                   .replaceAll("(\\d+\\.?\\d*)mm", "($1*0.001)m")
-                   .replaceAll("(\\d+\\.?\\d*)kg", "($1*1000)g")
-                   .replaceAll("(\\d+\\.?\\d*)t", "($1*1000000)g")
-                   .replaceAll("(\\d+\\.?\\d*)min", "($1*60)s")
-                   .replaceAll("(\\d+\\.?\\d*)h", "($1*3600)s");
+        text = text.replaceAll("(\\d+)km", "($1*1000)m").replaceAll("(\\d+)cm", "($1*0.01)m")
+                   .replaceAll("(\\d+)mm", "($1*0.001)m").replaceAll("(\\d+)kg", "($1*1000)g")
+                   .replaceAll("(\\d+)t", "($1*1000000)g").replaceAll("(\\d+)min", "($1*60)s")
+                   .replaceAll("(\\d+)h", "($1*3600)s");
         try {
             Polynomial res = new Parser(vorbereiten(text)).parse();
             resultField.setText(res.toString());
@@ -240,17 +357,15 @@ public class Main extends JFrame {
             if (input.endsWith("^2")) input = input.substring(0, input.length() - 2).trim();
             if (input.startsWith("(") && input.endsWith(")")) input = input.substring(1, input.length() - 1).trim();
             String[] parts = input.split("(?<=\\d|[a-zA-Z])(?=[+-])|(?<=[+-])(?=\\d|[a-zA-Z])");
-            Polynomial polyA, polyB;
-            int opIndex = -1;
-            for (int i = 0; i < parts.length; i++) if (parts[i].equals("+") || parts[i].equals("-")) { opIndex = i; break; }
-            if (opIndex != -1) {
-                StringBuilder sbA = new StringBuilder(); for (int i = 0; i < opIndex; i++) sbA.append(parts[i]);
-                polyA = new Parser(vorbereiten(sbA.toString())).parse();
-                StringBuilder sbB = new StringBuilder(); for (int i = opIndex; i < parts.length; i++) sbB.append(parts[i]);
-                polyB = new Parser(vorbereiten(sbB.toString())).parse();
-            } else { polyA = new Parser(vorbereiten(input)).parse(); polyB = new Polynomial(0, ""); }
-            Polynomial ergebnis = polyA.add(polyB).mul(polyA.add(polyB));
-            resultField.setText(ergebnis.toString());
+            Polynomial pA, pB; int opIdx = -1;
+            for (int i = 0; i < parts.length; i++) if (parts[i].equals("+") || parts[i].equals("-")) { opIdx = i; break; }
+            if (opIdx != -1) {
+                StringBuilder sA = new StringBuilder(); for (int i = 0; i < opIdx; i++) sA.append(parts[i]);
+                pA = new Parser(vorbereiten(sA.toString())).parse();
+                StringBuilder sB = new StringBuilder(); for (int i = opIdx; i < parts.length; i++) sB.append(parts[i]);
+                pB = new Parser(vorbereiten(sB.toString())).parse();
+            } else { pA = new Parser(vorbereiten(input)).parse(); pB = new Polynomial(0, ""); }
+            resultField.setText(pA.add(pB).mul(pA.add(pB)).toString());
         } catch (Exception e) { resultField.setText("Error!"); }
     }
 
@@ -259,34 +374,29 @@ public class Main extends JFrame {
             String[] seiten = inputField.getText().split("=");
             Polynomial links = new Parser(vorbereiten(seiten[0])).parse();
             Polynomial rechts = new Parser(vorbereiten(seiten[1])).parse();
-            String varName = "";
-            for (String k : links.terms.keySet()) if (!k.isEmpty()) varName = k;
-            if (varName.isEmpty()) for (String k : rechts.terms.keySet()) if (!k.isEmpty()) varName = k;
-            double diffVar = links.terms.getOrDefault(varName, 0.0) - rechts.terms.getOrDefault(varName, 0.0);
-            double diffConst = rechts.terms.getOrDefault("", 0.0) - links.terms.getOrDefault("", 0.0);
-            if (diffVar == 0) resultField.setText(diffConst == 0 ? "Infinite" : "No solution");
-            else resultField.setText(varName + " = " + formatZahl(diffConst / diffVar));
+            String var = "";
+            for (String k : links.terms.keySet()) if (!k.isEmpty()) var = k;
+            if (var.isEmpty()) for (String k : rechts.terms.keySet()) if (!k.isEmpty()) var = k;
+            double dV = links.terms.getOrDefault(var, 0.0) - rechts.terms.getOrDefault(var, 0.0);
+            double dC = rechts.terms.getOrDefault("", 0.0) - links.terms.getOrDefault("", 0.0);
+            if (dV == 0) resultField.setText(dC == 0 ? "Infinite" : "No solution");
+            else resultField.setText(var + " = " + formatZahl(dC / dV));
         } catch (Exception e) { resultField.setText("Error!"); }
     }
 
     private void starteTemp() {
-        String text = basisBereinigung(inputField.getText());
         try {
-            if (text.endsWith("f") || text.contains("°f")) {
-                double f = Double.parseDouble(text.replaceAll("[^0-9.-]", ""));
-                resultField.setText(formatZahl((f - 32) * 5 / 9) + " °C");
-            } else {
-                double c = Double.parseDouble(text.replaceAll("[^0-9.-]", ""));
-                resultField.setText(formatZahl((c * 9 / 5) + 32) + " °F");
-            }
+            String text = basisBereinigung(inputField.getText());
+            double val = Double.parseDouble(text.replaceAll("[^0-9.-]", ""));
+            if (text.contains("f")) resultField.setText(formatZahl((val - 32) * 5 / 9) + " °C");
+            else resultField.setText(formatZahl((val * 9 / 5) + 32) + " °F");
         } catch (Exception e) { resultField.setText("Error!"); }
     }
 
     private void starteProzent() {
-        String text = basisBereinigung(inputField.getText());
         try {
-            Pattern kaufm = Pattern.compile("(\\d+\\.?\\d*)([+-])(\\d+\\.?\\d*)%");
-            Matcher m = kaufm.matcher(text);
+            String text = basisBereinigung(inputField.getText());
+            Matcher m = Pattern.compile("(\\d+\\.?\\d*)([+-])(\\d+\\.?\\d*)%").matcher(text);
             if (m.find()) {
                 double b = Double.parseDouble(m.group(1)), p = Double.parseDouble(m.group(3));
                 resultField.setText(formatZahl(m.group(2).equals("+") ? b * (1 + p / 100) : b * (1 - p / 100)));
@@ -294,173 +404,48 @@ public class Main extends JFrame {
         } catch (Exception e) { resultField.setText("Error!"); }
     }
 
-    private void initializeUI() {
-        sideBar = new JPanel(); sideBar.setLayout(new BoxLayout(sideBar, BoxLayout.Y_AXIS));
-        sideBar.setBackground(Color.BLACK); sideBar.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        sideBar.setPreferredSize(new Dimension(180, 550));
-
-        JPanel mainPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 15));
-        mainPanel.setBackground(Color.BLACK);
-
-        label = new JLabel(""); label.setForeground(Color.WHITE);
-        inputField = new JTextField(30); inputField.setBackground(Color.BLACK); 
-        inputField.setForeground(Color.WHITE); inputField.setCaretColor(Color.WHITE);
-
-        calcNormal = new JButton(); styleButton(calcNormal, new Color(52, 152, 219));
-        calcBinom = new JButton(); styleButton(calcBinom, new Color(46, 204, 113));
-        solveBtn = new JButton(); styleButton(solveBtn, new Color(155, 89, 182));
-        tempumrechBtn = new JButton(); styleButton(tempumrechBtn, new Color(243, 156, 18));
-        einheitBtn = new JButton(); styleButton(einheitBtn, new Color(150, 75, 70));
-        prozentBtn = new JButton(); styleButton(prozentBtn, new Color(50, 10, 180));
-        copyBtn = new JButton(); styleButton(copyBtn, new Color(149, 165, 166));
-        clearBtn = new JButton(); styleButton(clearBtn, new Color(231, 76, 60));
-        switchThemeBtn = new JButton(); styleButton(switchThemeBtn, new Color(52, 73, 94));
-        autoAusBtn = new JButton("Auto"); styleButton(autoAusBtn, new Color(100, 100, 100));
-        wurzelBtn = new JButton("√"); styleButton(wurzelBtn, new Color(13, 90, 70));
-        extendedBtn = new JButton(); styleButton(extendedBtn, new Color(37, 89, 69));
-        langBtn = new JButton(); styleButton(langBtn, new Color(100, 50, 150));
-        speakBtn = new JButton(); styleButton(speakBtn, new Color(41, 128, 185));
-        simulationBtn = new JButton("Simulation"); styleButton(simulationBtn, new Color(22, 160, 133));
-
-        sideBar.add(extendedBtn); sideBar.add(Box.createVerticalStrut(10));
-        JButton[] extendedList = {tempumrechBtn, einheitBtn, prozentBtn, wurzelBtn, calcBinom, solveBtn, calcNormal, simulationBtn};
-        for (JButton b : extendedList) { b.setVisible(false); b.setMaximumSize(new Dimension(150, 30)); sideBar.add(b); sideBar.add(Box.createVerticalStrut(5)); }
-
-        mainPanel.add(label); mainPanel.add(inputField); mainPanel.add(autoAusBtn);
-        mainPanel.add(copyBtn); mainPanel.add(clearBtn); mainPanel.add(switchThemeBtn); mainPanel.add(langBtn); mainPanel.add(speakBtn);
-
-        ergLabel = new JLabel(""); ergLabel.setForeground(Color.WHITE);
-        resultField = new JTextField("", 40); resultField.setEditable(false); 
-        resultField.setBorder(null); resultField.setBackground(null);
-        resultField.setHorizontalAlignment(JTextField.CENTER);
-        resultField.setFont(new Font("Monospaced", Font.BOLD, 22)); resultField.setForeground(Color.WHITE);
-
-        mainPanel.add(ergLabel); mainPanel.add(resultField);
-        add(sideBar, BorderLayout.WEST); add(mainPanel, BorderLayout.CENTER);
-        updateLanguage();
+    private void themeSwitch() {
+        boolean isDark = sideBar.getBackground() == Color.BLACK;
+        Color bg = isDark ? Color.WHITE : Color.BLACK;
+        Color fg = isDark ? Color.BLACK : Color.WHITE;
+        
+        getContentPane().setBackground(bg);
+        sideBar.setBackground(bg);
+        topBar.setBackground(bg);
+        inputField.setBackground(bg); inputField.setForeground(fg); inputField.setCaretColor(fg);
+        resultField.setForeground(fg);
+        label.setForeground(fg); ergLabel.setForeground(fg);
+        
+        // Panels im Frame suchen
+        for (Component c : getContentPane().getComponents()) if (c instanceof JPanel) c.setBackground(bg);
+        revalidate(); repaint();
     }
 
-    private void styleButton(JButton b, Color c) {
-        b.setBackground(c); b.setForeground(Color.WHITE); b.setFocusPainted(false);
-        b.setFont(new Font("Arial", Font.BOLD, 12)); b.setFocusable(false);
-    }
-
-    private void setupListeners() {
-        calcNormal.addActionListener(e -> starteNormal());
-        inputField.addActionListener(e -> starteAuto());
-        calcBinom.addActionListener(e -> starteBinom());
-        solveBtn.addActionListener(e -> starteGleichung());
-        clearBtn.addActionListener(e -> { inputField.setText(""); resultField.setText(texts.get("wait")[isEnglish?1:0]); });
-        tempumrechBtn.addActionListener(e -> starteTemp());
-        einheitBtn.addActionListener(e -> starteEinheitenRechner());
-        prozentBtn.addActionListener(e -> starteProzent());
-        wurzelBtn.addActionListener(e -> { inputField.setText(inputField.getText() + "√("); inputField.requestFocus(); });
-        copyBtn.addActionListener(e -> { Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(resultField.getText()), null); JOptionPane.showMessageDialog(this, isEnglish ? "Copied!" : "Kopiert!"); });
-        switchThemeBtn.addActionListener(e -> themeSwitch());
-        autoAusBtn.addActionListener(e -> starteAuto());
-        langBtn.addActionListener(e -> { isEnglish = !isEnglish; updateLanguage(); });
-        extendedBtn.addActionListener(e -> {
-            isExtended = !isExtended;
-            for (JButton b : extendedList()) b.setVisible(isExtended);
-            sideBar.setBorder(isExtended ? BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, Color.GRAY), BorderFactory.createEmptyBorder(10, 10, 10, 10)) : BorderFactory.createEmptyBorder(10, 10, 10, 10));
-            updateLanguage(); revalidate(); repaint();
-        });
-        speakBtn.addActionListener(e -> vorlesen(resultField.getText()));
-        simulationBtn.addActionListener(e -> simulation());
-    }
-    
-    private JButton[] extendedList() { return new JButton[]{tempumrechBtn, einheitBtn, prozentBtn, wurzelBtn, calcBinom, solveBtn, calcNormal, simulationBtn}; }
-
-   private void themeSwitch() {
-    // 1. Prüfen, ob Dark Mode aktiv
-    boolean isDark = sideBar.getBackground() == Color.BLACK;
-    
-    // 2. Farben festlegen
-    Color bg = isDark ? Color.WHITE : Color.BLACK;
-    Color fg = isDark ? Color.BLACK : Color.WHITE;
-    Color borderCol = isDark ? Color.LIGHT_GRAY : Color.GRAY;
-
-    // 3. Den Hintergrund der Haupt-Container ändern
-    getContentPane().setBackground(bg);
-    sideBar.setBackground(bg);
-    
-    for (java.awt.Component comp : getContentPane().getComponents()) {
-        if (comp instanceof JPanel) {
-            comp.setBackground(bg);
-        }
-    }
-
-    // 4. Textfarben und Felder anpassen
-    inputField.setBackground(bg);
-    inputField.setForeground(fg);
-    inputField.setCaretColor(fg);
-    resultField.setForeground(fg);
-    ergLabel.setForeground(fg);
-    label.setForeground(fg);
-
-    // 5. Sidebar-Border anpassen
-    if (isExtended) {
-        sideBar.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(0, 0, 0, 1, borderCol), 
-            BorderFactory.createEmptyBorder(10, 10, 10, 10)));
-    }
-}
+    // --- POLYNOMIAL & PARSER ---
 
     static class Polynomial {
         Map<String, Double> terms = new TreeMap<>();
         Polynomial(double v, String var) { if (v != 0) terms.put(var, v); }
         Polynomial() {}
         void addTerm(String var, double val) { terms.put(var, terms.getOrDefault(var, 0.0) + val); }
-        
         Polynomial add(Polynomial o) { Polynomial r = new Polynomial(); r.terms.putAll(this.terms); o.terms.forEach(r::addTerm); return r; }
         Polynomial sub(Polynomial o) { Polynomial r = new Polynomial(); r.terms.putAll(this.terms); o.terms.forEach((k, v) -> r.addTerm(k, -v)); return r; }
-        
         Polynomial mul(Polynomial o) {
             Polynomial r = new Polynomial();
             for (var e1 : terms.entrySet()) for (var e2 : o.terms.entrySet()) {
-                // Buchstaben kombinieren und sortieren (z.B. "m" + "m" = "mm")
-                char[] c = (e1.getKey() + e2.getKey()).toCharArray(); 
-                Arrays.sort(c);
+                char[] c = (e1.getKey() + e2.getKey()).toCharArray(); Arrays.sort(c);
                 r.addTerm(new String(c), e1.getValue() * e2.getValue());
             } return r;
         }
-
-        // Hilfsmethode: Macht aus "mm" -> "m²", aus "mmm" -> "m³" etc.
-        private String formatExponenten(String var) {
-            if (var.isEmpty()) return "";
-            StringBuilder sb = new StringBuilder();
-            Map<Character, Integer> counts = new TreeMap<>();
-            
-            // Zähle wie oft jeder Buchstabe vorkommt
-            for (char c : var.toCharArray()) {
-                counts.put(c, counts.getOrDefault(c, 0) + 1);
-            }
-
-            for (var entry : counts.entrySet()) {
-                sb.append(entry.getKey());
-                int exp = entry.getValue();
-                if (exp == 2) sb.append("²");
-                else if (exp == 3) sb.append("³");
-                else if (exp > 3) sb.append("^").append(exp); // Für sehr hohe Potenzen
-            }
-            return sb.toString();
-        }
-
         @Override public String toString() {
             if (terms.isEmpty()) return "0";
             StringBuilder sb = new StringBuilder();
             for (var e : terms.entrySet()) {
-                double v = e.getValue();
-                String varRaw = e.getKey();
-                String varPretty = formatExponenten(varRaw); // Hier wird m² erzeugt
-
-                if (sb.length() > 0) sb.append(v > 0 ? " + " : " - "); 
-                else if (v < 0) sb.append("-");
-                
+                double v = e.getValue(); String var = e.getKey();
+                if (sb.length() > 0) sb.append(v > 0 ? " + " : " - "); else if (v < 0) sb.append("-");
                 double absV = Math.abs(v);
-                // Zahl nur anzeigen, wenn sie nicht 1 ist oder keine Variable da ist
-                if (absV != 1 || varPretty.isEmpty()) sb.append(formatZahl(absV));
-                sb.append(varPretty);
+                if (absV != 1 || var.isEmpty()) sb.append(formatZahl(absV));
+                sb.append(var);
             } return sb.toString();
         }
     }
@@ -489,41 +474,31 @@ public class Main extends JFrame {
             Polynomial b = fact();
             if (eat('^')) {
                 double exp = power().terms.getOrDefault("", 1.0);
-                if (b.terms.size() == 1 && b.terms.containsKey("")) return new Polynomial(Math.pow(b.terms.get(""), exp), "");
                 Polynomial r = new Polynomial(1, ""); for (int i = 0; i < (int) exp; i++) r = r.mul(b); return r;
             } return b;
         }
         Polynomial fact() {
-            if (eat('+')) return fact(); 
-            if (eat('-')) return fact().mul(new Polynomial(-1, ""));
-            
+            if (eat('+')) return fact(); if (eat('-')) return fact().mul(new Polynomial(-1, ""));
             Polynomial x;
-            if (eat('(')) { 
-                x = sum(); 
-                eat(')'); 
-            } 
-            else if (eat('√')) { // <- Viel einfacher, da "sqrt" vorher in "√" umgewandelt wurde!
-                if (eat('(')) {
-                    x = sum();
-                    eat(')');
-                } else {
-                    x = fact();
-                }
+            if (eat('(')) { x = sum(); eat(')'); }
+            else if (eat('√')) {
+                x = eat('(') ? sum() : fact();
+                eat(')'); // Falls Klammer da war
                 return new Polynomial(Math.sqrt(x.terms.getOrDefault("", 0.0)), "");
-            } 
-            else if (Character.isLetter(ch)) {
+            } else if (Character.isLetter(ch)) {
                 StringBuilder sb = new StringBuilder();
                 while (Character.isLetter(ch)) { sb.append((char) ch); next(); }
                 x = new Polynomial(1, sb.toString());
             } else {
                 StringBuilder sb = new StringBuilder();
                 while (Character.isDigit(ch) || ch == '.') { sb.append((char) ch); next(); }
-                if (sb.length() == 0) return new Polynomial(0, ""); // Verhindert einen Absturz bei Tippfehlern
-                x = new Polynomial(Double.parseDouble(sb.toString()), "");
+                x = new Polynomial(Double.parseDouble(sb.toString().isEmpty() ? "0" : sb.toString()), "");
             }
             return x;
         }
     }
 
-    public static void main(String[] args) { SwingUtilities.invokeLater(() -> new Main().setVisible(true)); }
+    public static void main(String[] args) { 
+        SwingUtilities.invokeLater(() -> new Main().setVisible(true)); 
+    }
 }
