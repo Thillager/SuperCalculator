@@ -26,7 +26,7 @@ import javax.swing.SwingUtilities;
 
 public class Main extends JFrame {
     private JTextField inputField, resultField;
-    private JButton calcBinom, calcNormal, solveBtn, clearBtn, copyBtn, tempumrechBtn, switchThemeBtn, autoAusBtn, einheitBtn, prozentBtn, wurzelBtn, extendedBtn, langBtn, speakBtn;
+    private JButton calcBinom, calcNormal, solveBtn, clearBtn, copyBtn, tempumrechBtn, switchThemeBtn, autoAusBtn, einheitBtn, prozentBtn, wurzelBtn, extendedBtn, langBtn, speakBtn, simulationBtn;
     private JLabel ergLabel, label;
     private boolean isExtended = false;
     private boolean isEnglish = false;
@@ -60,6 +60,7 @@ public class Main extends JFrame {
         texts.put("extended", new String[]{"Erweitert", "Extended"});
         texts.put("standard", new String[]{"Standard", "Basic"});
         texts.put("wait", new String[]{"Warte auf Eingabe...", "Waiting for input..."});
+        texts.put("speak", new String[]{"Vorlesen", "Speak"});
     }
 
     private void updateLanguage() {
@@ -77,6 +78,7 @@ public class Main extends JFrame {
         switchThemeBtn.setText(texts.get("theme")[idx]);
         extendedBtn.setText(isExtended ? texts.get("standard")[idx] : texts.get("extended")[idx]);
         langBtn.setText(isEnglish ? "DE" : "EN");
+        speakBtn.setText(texts.get("speak")[idx]);
 
         if (resultField.getText().contains("Warte") || resultField.getText().contains("Waiting")) {
             resultField.setText(texts.get("wait")[idx]);
@@ -108,7 +110,7 @@ public class Main extends JFrame {
         // 1. Alle "sqrt" in "√" umwandeln, das macht den Parser VIEL einfacher
         s = s.replace("sqrt", "√");
 
-        // 2. Automatische Multiplikation (Buchstaben und Klammern, aber KEINE Malzeichen in die Wurzel fummeln!)
+        // 2. Automatische Multiplikation
         s = s.replaceAll("(\\d)([a-zA-Z])", "$1*$2")
              .replaceAll("(\\d)(\\()", "$1*$2")
              .replaceAll("([a-zA-Z])(\\()", "$1*$2")
@@ -144,6 +146,25 @@ public class Main extends JFrame {
             resultField.setText(res.toString());
         } catch (Exception e) { resultField.setText(isEnglish ? "Syntax Error!" : "Syntax-Fehler!"); }
     }
+
+    private void simulation() {
+        String text = basisBereinigung(inputField.getText());
+
+        try{
+        String [] teile = text.split("%");
+        double p = Double.parseDouble(teile[0]) / 100.0;
+        int versuche = Integer.parseInt(teile[1]);
+
+        int erfolge = 0;
+        for (int i = 0; i < versuche; i++) {
+            if (Math.random() < p) erfolge++;
+
+            resultField.setText(erfolge + " von " + versuche);
+        }
+    } catch (Exception e) { resultField.setText("Error!"); return; }
+
+    }
+
 
     private void starteBruchZuProzent() {
         try {
@@ -298,10 +319,11 @@ public class Main extends JFrame {
         wurzelBtn = new JButton("√"); styleButton(wurzelBtn, new Color(13, 90, 70));
         extendedBtn = new JButton(); styleButton(extendedBtn, new Color(37, 89, 69));
         langBtn = new JButton(); styleButton(langBtn, new Color(100, 50, 150));
-        speakBtn = new JButton("🔊"); styleButton(speakBtn, new Color(41, 128, 185));
+        speakBtn = new JButton(); styleButton(speakBtn, new Color(41, 128, 185));
+        simulationBtn = new JButton("Simulation"); styleButton(simulationBtn, new Color(22, 160, 133));
 
         sideBar.add(extendedBtn); sideBar.add(Box.createVerticalStrut(10));
-        JButton[] extendedList = {tempumrechBtn, einheitBtn, prozentBtn, wurzelBtn, calcBinom, solveBtn, calcNormal};
+        JButton[] extendedList = {tempumrechBtn, einheitBtn, prozentBtn, wurzelBtn, calcBinom, solveBtn, calcNormal, simulationBtn};
         for (JButton b : extendedList) { b.setVisible(false); b.setMaximumSize(new Dimension(150, 30)); sideBar.add(b); sideBar.add(Box.createVerticalStrut(5)); }
 
         mainPanel.add(label); mainPanel.add(inputField); mainPanel.add(autoAusBtn);
@@ -344,9 +366,10 @@ public class Main extends JFrame {
             updateLanguage(); revalidate(); repaint();
         });
         speakBtn.addActionListener(e -> vorlesen(resultField.getText()));
+        simulationBtn.addActionListener(e -> simulation());
     }
     
-    private JButton[] extendedList() { return new JButton[]{tempumrechBtn, einheitBtn, prozentBtn, wurzelBtn, calcBinom, solveBtn, calcNormal}; }
+    private JButton[] extendedList() { return new JButton[]{tempumrechBtn, einheitBtn, prozentBtn, wurzelBtn, calcBinom, solveBtn, calcNormal, simulationBtn}; }
 
    private void themeSwitch() {
     // 1. Prüfen, ob Dark Mode aktiv
