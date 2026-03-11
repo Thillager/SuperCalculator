@@ -1,6 +1,8 @@
+
 plugins {
-    id("java")
+    java
 }
+
 
 group = "org.example"
 version = "2.0.0"
@@ -24,3 +26,4 @@ tasks.jar {
         attributes["Main-Class"] = "Main"
     }
 }
+
