@@ -80,11 +80,26 @@ public class Main extends JFrame {
             "Willkommen beim Super Taschenrechner!\n\n" +
             "Dieser Taschenrechner ist noch in arbeit, es sind also 'devtools' eingebaut.\n" +
             "Die erweiterten Funktionen sollest du eigentlich nie nutzen, esseiden du entwickelst etwas, das Ergebnis wirkt fasch, oder du willst die Simulation nutzen.\n" +    
-            "Indem du Enter drückst oder auf Auto klickst, wird automatisch die richtige Funktion genutzt.\n",
+            "Indem du Enter drückst oder auf Auto klickst, wird automatisch die richtige Funktion genutzt.\n" +
+            "Einige Buttons, die eine Erklärung brauchen:\n" +
+            "- Binomische Formel: Entfaltet Ausdrücke wie (x+2)^2 zu x^2 + 4x + 4\n" +
+            "- Gleichung lösen: Löst einfache Gleichungen wie 2x + 3 = 7 nach x auf\n" +
+            "- Einheiten: Rechnet Einheiten um, z.B. 5km zu 5000m oder 2h zu 120min und kann mit einheiten rechnen\n" +
+            "- Prozent: Berechnet prozentuale Änderungen, z.B. 100 + 10% = 110 oder 100 - 10% = 90\n" +
+            "- Simulation: Simuliert eine Anzahl von Versuchen mit einer gegebenen Erfolgswahrscheinlichkeit, z.B. 30% 1000 wird 1000 Versuche mit einer 30%igen Erfolgswahrscheinlichkeit simulieren und Echtzeitergebnisse anzeigen\n" +
+            "\nFalls du Fragen hast oder Vorschläge möchtest, zögere nicht, mich zu kontaktieren!",
+
             "Welcome to the Super Calculator!\n\n" +
             "This calculator is still in development, so 'devtools' are included.\n" + 
             "You should never need the extended functions unless you're developing something, the result looks cool, or you want to use the simulation.\n" +
-            "By pressing Enter or clicking Auto, the correct function will be used automatically.\n"
+            "By pressing Enter or clicking Auto, the correct function will be used automatically.\n" +
+            "Some buttons that need explanation:\n" +
+            "- Binomial Formula: Expands expressions like (x+2)^2 into x^2 + 4x + 4\n" +
+            "- Solve Equation: Solves simple equations like 2x + 3 = 7 for x\n" +
+            "- Units: Converts units like 5km to 5000m or 2h to 120min and can calculate with units\n" +
+            "- Percent: Calculates percentage changes like 100 + 10% = 110 or 100 - 10% = 90\n" +
+            "- Simulation: Simulates a number of trials with a given success probability, e.g. 30% 1000 will simulate 1000 trials with a 30% success chance and show live results\n" +
+            "\nIf you have any questions or suggestions, feel free to contact me!"
         });
     }
 
