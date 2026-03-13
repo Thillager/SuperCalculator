@@ -42,3 +42,8 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+### Replit ###
+.upm/
+target/
+.replit

@@ -29,7 +29,7 @@ import javax.swing.Timer;
 public class Main extends JFrame {
     private JTextField inputField, resultField;
     private JButton calcBinom, calcNormal, solveBtn, clearBtn, copyBtn, tempumrechBtn, switchThemeBtn, autoAusBtn,
-            einheitBtn, prozentBtn, wurzelBtn, extendedBtn, langBtn, speakBtn, simulationBtn, simulationStopBtn, helpBtn;
+            einheitBtn, prozentBtn, wurzelBtn, extendedBtn, langBtn, speakBtn, simulationBtn, simulationStopBtn, helpBtn, würfelBtn;
     private JLabel ergLabel, label;
     private boolean isExtended = false;
     private boolean isEnglish = false;
@@ -72,6 +72,7 @@ public class Main extends JFrame {
         texts.put("standard", new String[] { "Standard", "Basic" });
         texts.put("wait", new String[] { "Warte auf Eingabe...", "Waiting for input..." });
         texts.put("speak", new String[] { "Vorlesen", "Speak" });
+        texts.put("würfel", new String[] { "Würfel", "Dice" });
 
         //help
         texts.put("help", new String[]{"Hilfe", "Help"});
@@ -139,6 +140,8 @@ public class Main extends JFrame {
         styleButton(simulationStopBtn, new Color(192, 57, 43));
         helpBtn = new JButton();
         styleButton(helpBtn, new Color(250, 0, 0));
+        würfelBtn = new JButton();
+        styleButton(würfelBtn, new Color(255, 255, 255));
 
         label = new JLabel("");
         label.setForeground(Color.WHITE);
@@ -202,6 +205,7 @@ public class Main extends JFrame {
         mainPanel.add(clearBtn);
         mainPanel.add(ergLabel);
         mainPanel.add(resultField);
+        mainPanel.add(würfelBtn);
 
         // 4. WRAPPER (Kombiniert TopBar und MainPanel)
         JPanel centerWrapper = new JPanel(new BorderLayout());
@@ -296,6 +300,7 @@ public class Main extends JFrame {
             }
         });
         helpBtn.addActionListener(e -> help());
+        würfelBtn.addActionListener(e -> würfel());
     }
 
     private JButton[] extendedList() {
@@ -389,6 +394,23 @@ public class Main extends JFrame {
         // Pop-up anzeigen
         JOptionPane.showMessageDialog(this, scrollPane, title,                 JOptionPane.INFORMATION_MESSAGE);
     }
+
+    private void würfel() {
+        try {
+            String text = basisBereinigung(inputField.getText());
+            String[] teile = text.split("d");
+            int anzahl = Integer.parseInt(teile[0]);
+            int seiten = Integer.parseInt(teile[1]);
+            int summe = 0;
+            for (int i = 0; i < anzahl; i++) {
+                summe += (int) (Math.random() * seiten) + 1;
+            }
+            resultField.setText(String.valueOf(summe));
+        }
+        catch (Exception e) {resultField.setText("Error!");
+                            }
+    }
+
 
     private void simulation() {
         try {
