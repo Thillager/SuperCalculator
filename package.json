@@ -19,6 +19,7 @@
         "title": "SuperCalculator",
         "platformBundlesEnabled": false,
         "downloadPage": {"platforms": ["default"]}
+        "webapp": true
     },
     "dependencies": {
         "command-exists-promise": "^2.0.2",
