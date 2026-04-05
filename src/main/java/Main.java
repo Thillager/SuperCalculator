@@ -141,7 +141,7 @@ public class Main extends JFrame {
         helpBtn = new JButton();
         styleButton(helpBtn, new Color(250, 0, 0));
         würfelBtn = new JButton();
-        styleButton(würfelBtn, new Color(255, 255, 255));
+        styleButton(würfelBtn, new Color(0, 98, 255));
 
         label = new JLabel("");
         label.setForeground(Color.WHITE);
@@ -205,7 +205,6 @@ public class Main extends JFrame {
         mainPanel.add(clearBtn);
         mainPanel.add(ergLabel);
         mainPanel.add(resultField);
-        mainPanel.add(würfelBtn);
 
         // 4. WRAPPER (Kombiniert TopBar und MainPanel)
         JPanel centerWrapper = new JPanel(new BorderLayout());
@@ -252,6 +251,7 @@ public class Main extends JFrame {
             resultField.setText(texts.get("wait")[idx]);
         }
         helpBtn.setText(texts.get("help")[idx]);
+        würfelBtn.setText(texts.get("würfel")[idx]);
     }
 
     private void setupListeners() {
@@ -305,7 +305,7 @@ public class Main extends JFrame {
 
     private JButton[] extendedList() {
         return new JButton[] { tempumrechBtn, einheitBtn, prozentBtn, wurzelBtn, calcBinom, solveBtn, calcNormal,
-                simulationBtn, simulationStopBtn, speakBtn};
+                simulationBtn, simulationStopBtn, speakBtn, würfelBtn};
     }
 
     // --- RECHENLOGIK & HELPER ---
