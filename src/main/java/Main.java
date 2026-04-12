@@ -30,7 +30,7 @@ import javax.swing.Timer;
 public class Main extends JFrame {
     private JTextField inputField, resultField;
     private JButton calcBinom, calcNormal, solveBtn, clearBtn, copyBtn, tempumrechBtn, switchThemeBtn, autoAusBtn,
-            einheitBtn, prozentBtn, wurzelBtn, extendedBtn, langBtn, speakBtn, simulationBtn, simulationStopBtn, helpBtn, würfelBtn, baumBtn;
+            einheitBtn, prozentBtn, wurzelBtn, extendedBtn, langBtn, speakBtn, simulationBtn, simulationStopBtn, helpBtn, würfelBtn, baumBtn, betterEinheitenBtn;
     private JLabel ergLabel, label;
     private boolean isExtended = false;
     private boolean isEnglish = false;
@@ -145,6 +145,8 @@ public class Main extends JFrame {
         styleButton(würfelBtn, new Color(0, 98, 255));
         baumBtn = new JButton("Baumdiagramm");
         styleButton(baumBtn, new Color(100, 100, 100));
+        betterEinheitenBtn = new JButton("Better Einheiten");
+        styleButton(betterEinheitenBtn, new Color(100, 100, 100));
 
         label = new JLabel("");
         label.setForeground(Color.WHITE);
@@ -255,6 +257,8 @@ public class Main extends JFrame {
         }
         helpBtn.setText(texts.get("help")[idx]);
         würfelBtn.setText(texts.get("würfel")[idx]);
+        betterEinheitenBtn.setText("Better Einheiten");
+        
     }
 
     private void setupListeners() {
@@ -305,11 +309,12 @@ public class Main extends JFrame {
         });
         helpBtn.addActionListener(e -> help());
         würfelBtn.addActionListener(e -> würfel());
+        betterEinheitenBtn.addActionListener(e -> startebetterEinheitenRechner());
     }
 
     private JButton[] extendedList() {
         return new JButton[] { tempumrechBtn, einheitBtn, prozentBtn, wurzelBtn, calcBinom, solveBtn, calcNormal,
-                simulationBtn, simulationStopBtn, speakBtn, würfelBtn, baumBtn};
+                simulationBtn, simulationStopBtn, speakBtn, würfelBtn, baumBtn, betterEinheitenBtn};
     }
 
     // --- RECHENLOGIK & HELPER ---
@@ -481,6 +486,14 @@ public class Main extends JFrame {
         } catch (Exception e) {
             resultField.setText("Error!");
         }
+    }
+
+    private void startebetterEinheitenRechner() {
+        mainPanel.removeAll();
+        mainPanel.setLayout(new java.awt.BorderLayout());
+        mainPanel.add(new betterEinheitenUmrechner(), BorderLayout.CENTER);
+        mainPanel.revalidate();
+        mainPanel.repaint();
     }
 
     private void starteBruchZuProzent() {
@@ -866,6 +879,129 @@ public class Main extends JFrame {
             g.drawString(Main.formatZahl((1 - p) * 100) + "%", (x + nextX) / 2, (y + yDown) / 2);
 
             drawTree(g, nextX, yDown, level + 1, currentProb * (1 - p));
+        }
+    }
+
+
+    class betterEinheitenUmrechner extends javax.swing.JPanel {
+
+        // Einheiten-Tabellen
+        private java.util.Map<String, Double> längen = new java.util.HashMap<>();
+        private java.util.Map<String, Double> gewichte = new java.util.HashMap<>();
+
+        // UI Komponenten
+        private javax.swing.JComboBox<String> kategorieBox;
+        private javax.swing.JComboBox<String> boxVon = new javax.swing.JComboBox<>();
+        private javax.swing.JComboBox<String> boxZu = new javax.swing.JComboBox<>();
+        private javax.swing.JTextField eingabeFeld = new javax.swing.JTextField();
+        private javax.swing.JLabel ergebnisLabel =
+                new javax.swing.JLabel("Ergebnis: ---", javax.swing.SwingConstants.CENTER);
+        private javax.swing.JButton berechnenButton =
+                new javax.swing.JButton("Umrechnen");
+
+        public betterEinheitenUmrechner() {
+
+            // -------------------------
+            // 1. Einheiten definieren
+            // -------------------------
+            längen.put("Millimeter", 0.001);
+            längen.put("Zentimeter", 0.01);
+            längen.put("Dezimeter", 0.1);
+            längen.put("Meter", 1.0);
+            längen.put("Kilometer", 1000.0);
+            längen.put("Zoll (Inch)", 0.0254);
+            längen.put("Fuss (Foot)", 0.3048);
+            längen.put("Meile", 1609.34);
+
+            gewichte.put("Milligramm", 0.001);
+            gewichte.put("Gramm", 1.0);
+            gewichte.put("Kilogramm", 1000.0);
+            gewichte.put("Tonne", 1000000.0);
+            gewichte.put("Pfund (lbs)", 453.592);
+
+            // -------------------------
+            // 2. Kategorie Auswahl
+            // -------------------------
+            kategorieBox = new javax.swing.JComboBox<>(new String[]{"Länge", "Gewicht"});
+
+            kategorieBox.addActionListener(e -> {
+                boxVon.removeAllItems();
+                boxZu.removeAllItems();
+
+                if (kategorieBox.getSelectedItem().equals("Länge")) {
+                    for (String s : längen.keySet()) {
+                        boxVon.addItem(s);
+                        boxZu.addItem(s);
+                    }
+                } else {
+                    for (String s : gewichte.keySet()) {
+                        boxVon.addItem(s);
+                        boxZu.addItem(s);
+                    }
+                }
+            });
+
+            // -------------------------
+            // 3. Layout
+            // -------------------------
+            this.setLayout(new java.awt.GridLayout(10, 1, 5, 5));
+            this.setBorder(javax.swing.BorderFactory.createEmptyBorder(15, 15, 15, 15));
+
+            this.add(new javax.swing.JLabel("1. Kategorie wählen:", javax.swing.SwingConstants.CENTER));
+            this.add(kategorieBox);
+
+            this.add(new javax.swing.JLabel("2. Wert eingeben:", javax.swing.SwingConstants.CENTER));
+            this.add(eingabeFeld);
+
+            this.add(new javax.swing.JLabel("3. Von:", javax.swing.SwingConstants.CENTER));
+            this.add(boxVon);
+
+            this.add(new javax.swing.JLabel("4. Nach:", javax.swing.SwingConstants.CENTER));
+            this.add(boxZu);
+
+            berechnenButton.setBackground(new java.awt.Color(70, 130, 180));
+            berechnenButton.setForeground(java.awt.Color.WHITE);
+            berechnenButton.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 12));
+
+            this.add(berechnenButton);
+
+            ergebnisLabel.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 14));
+            this.add(ergebnisLabel);
+
+            // Button-Action
+            berechnenButton.addActionListener(e -> umrechnen());
+
+            // Initiale Befüllung
+            for (String s : längen.keySet()) {
+                boxVon.addItem(s);
+                boxZu.addItem(s);
+            }
+        }
+
+        // -------------------------
+        // 4. Umrechnungslogik
+        // -------------------------
+        private void umrechnen() {
+            try {
+                String gewählteKat = (String) kategorieBox.getSelectedItem();
+
+                java.util.Map<String, Double> aktiveMap =
+                        gewählteKat.equals("Länge") ? längen : gewichte;
+
+                double wert = Double.parseDouble(eingabeFeld.getText().replace(",", "."));
+
+                double vonFaktor = aktiveMap.get(boxVon.getSelectedItem());
+                double zuFaktor = aktiveMap.get(boxZu.getSelectedItem());
+
+                double ergebnis = (wert * vonFaktor) / zuFaktor;
+
+                ergebnisLabel.setText(String.format("Ergebnis: %.4f", ergebnis));
+                ergebnisLabel.setForeground(java.awt.Color.BLACK);
+
+            } catch (Exception ex) {
+                ergebnisLabel.setText("Fehler: Zahl prüfen!");
+                ergebnisLabel.setForeground(java.awt.Color.RED);
+            }
         }
     }
     
