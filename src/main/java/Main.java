@@ -425,32 +425,25 @@ public class Main extends JFrame {
         try {
             String text = inputField.getText().trim().toLowerCase();
 
-            double[] probs;
+            java.util.List<Branch[]> levels = new java.util.ArrayList<>();
 
-            // 🔥 Auto-Erkennung: "2 mal 50%"
-            if (text.contains("mal")) {
-                String[] teile = text.split("mal");
-                int n = Integer.parseInt(teile[0].trim());
-                double p = parseProbability(teile[1].trim());
+            // Mehrere Stufen mit ";" getrennt
+            // Beispiel:
+            // kopf:50 zahl:50; kopf:50 zahl:50
 
-                probs = new double[n];
-                Arrays.fill(probs, p);
-            } else {
-                String[] teile = text.split("\\s+");
-                probs = new double[teile.length];
+            String[] stufen = text.split(";");
 
-                for (int i = 0; i < teile.length; i++) {
-                    probs[i] = parseProbability(teile[i]);
-                }
+            for (String stufe : stufen) {
+                levels.add(parseBranches(stufe));
             }
 
-            if (probs.length < 2 || probs.length > 3) {
-                resultField.setText("Nur 2 oder 3 Stufen!");
+            if (levels.size() < 1) {
+                resultField.setText("Mindestens 1 Stufe!");
                 return;
             }
 
             JFrame frame = new JFrame("Baumdiagramm");
-            frame.add(new BaumPanel(probs));
+            frame.add(new BaumPanel(levels));
             frame.pack();
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);
@@ -459,7 +452,7 @@ public class Main extends JFrame {
             resultField.setText("Error!");
         }
     }
-
+    
     private void simulation() {
         try {
             String text = basisBereinigung(inputField.getText());
@@ -633,6 +626,33 @@ public class Main extends JFrame {
         }
     }
 
+
+    private Branch[] parseBranches(String input) {
+        String[] parts = input.trim().split("\\s+");
+        Branch[] result = new Branch[parts.length];
+
+        double sum = 0;
+
+        for (int i = 0; i < parts.length; i++) {
+            String[] split = parts[i].split(":");
+
+            String name = split[0];
+            double prob = Double.parseDouble(split[1].replace("%", "")) / 100.0;
+
+            result[i] = new Branch(name, prob);
+            sum += prob;
+        }
+
+        // Optional: Warnung wenn Summe ≠ 1
+        if (Math.abs(sum - 1.0) > 0.001) {
+            JOptionPane.showMessageDialog(this, "Wahrscheinlichkeiten ergeben nicht 100%!");
+        }
+
+        return result;
+    }
+
+
+    
     private void themeSwitch() {
         boolean isDark = sideBar.getBackground() == Color.BLACK;
         Color bg = isDark ? Color.WHITE : Color.BLACK;
@@ -830,11 +850,12 @@ public class Main extends JFrame {
 
 
     class BaumPanel extends JPanel {
-        double[] probs;
 
-        public BaumPanel(double[] probs) {
-            this.probs = probs;
-            setPreferredSize(new Dimension(700, 400));
+        java.util.List<Branch[]> treeLevels;
+
+        public BaumPanel(java.util.List<Branch[]> treeLevels) {
+            this.treeLevels = treeLevels;
+            setPreferredSize(new Dimension(900, 500));
             setBackground(Color.WHITE);
         }
 
@@ -844,44 +865,53 @@ public class Main extends JFrame {
             int startX = 50;
             int startY = getHeight() / 2;
 
-            int levelGap = 180;
-            int branchOffset = 100;
-
-            drawTree(g, startX, startY, 0, 1.0);
+            drawTree(g, startX, startY, 0, 1.0, "");
         }
 
-        private void drawTree(Graphics g, int x, int y, int level, double currentProb) {
+        private void drawTree(Graphics g, int x, int y, int level, double currentProb, String path) {
+
             g.setColor(Color.BLACK);
-            g.drawString(Main.formatZahl(currentProb * 100) + "%", x - 20, y - 5);
-            if (level >= probs.length) {
-                // Endwert anzeigen
-                return;
+
+            if (!path.isEmpty()) {
+                g.drawString(path + " (" + Main.formatZahl(currentProb * 100) + "%)", x - 60, y - 5);
             }
 
-            double p = probs[level];
+            if (level >= treeLevels.size()) return;
+
+            Branch[] branches = treeLevels.get(level);
 
             int nextX = x + 180;
-            int offset = 100 / (level + 1);
 
-            int yUp = y - offset;
-            int yDown = y + offset;
+            int total = branches.length;
+            int height = 200;
+            int spacing = height / (total + 1);
 
-            // 🔵 Erfolg (grün)
-            g.setColor(Color.GREEN);
-            g.drawLine(x, y, nextX, yUp);
-            g.drawString(Main.formatZahl(p * 100) + "%", (x + nextX) / 2, (y + yUp) / 2);
+            for (int i = 0; i < total; i++) {
 
-            drawTree(g, nextX, yUp, level + 1, currentProb * p);
+                int newY = y - height / 2 + (i + 1) * spacing;
 
-            // 🔴 Misserfolg (rot)
-            g.setColor(Color.RED);
-            g.drawLine(x, y, nextX, yDown);
-            g.drawString(Main.formatZahl((1 - p) * 100) + "%", (x + nextX) / 2, (y + yDown) / 2);
+                Branch b = branches[i];
 
-            drawTree(g, nextX, yDown, level + 1, currentProb * (1 - p));
+                // Linie
+                g.setColor(Color.BLUE);
+                g.drawLine(x, y, nextX, newY);
+
+                // Text auf Linie
+                String label = b.name + " (" + Main.formatZahl(b.probability * 100) + "%)";
+                g.drawString(label, (x + nextX) / 2, (y + newY) / 2);
+
+                // Rekursion
+                drawTree(
+                    g,
+                    nextX,
+                    newY,
+                    level + 1,
+                    currentProb * b.probability,
+                    path.isEmpty() ? b.name : path + " → " + b.name
+                );
+            }
         }
     }
-
 
     class betterEinheitenUmrechner extends javax.swing.JPanel {
 
@@ -1002,6 +1032,16 @@ public class Main extends JFrame {
                 ergebnisLabel.setText("Fehler: Zahl prüfen!");
                 ergebnisLabel.setForeground(java.awt.Color.RED);
             }
+        }
+    }
+
+    class Branch {
+        String name;
+        double probability;
+
+        Branch(String name, double probability) {
+            this.name = name;
+            this.probability = probability;
         }
     }
     
