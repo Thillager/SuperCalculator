@@ -953,20 +953,25 @@ public class Main extends JFrame {
             gewichte.put("Tonne", 1000000.0);
             gewichte.put("Pfund (lbs)", 453.592);
 
-            geschwindigkeiten.put("Meter pro Sekkunde ", 1.0); //Basis
-            geschwindigkeiten.put("Meter pro Minute", 60.0);
-            geschwindigkeiten.put("Meter pro Stunde", 3600.0);
-            geschwindigkeiten.put("Zentimeter pro Sekunde", 100.0);;
-            geschwindigkeiten.put("Zentimeter pro Minute", 6000.0);
-            geschwindigkeiten.put("Zentimeter pro Stunde", 360000.0);
-            geschwindigkeiten.put("Kilometer pro Sekunde", 0.001);
-            geschwindigkeiten.put("Kilometer pro Minute", 3.6);
-            geschwindigkeiten.put("Kilometer pro Stunde", 3.6);
-            geschwindigkeiten.put("Knoten", 1.943844);
-            geschwindigkeiten.put("Meilen pro Stunde (Mph)", 2.236936);
-            geschwindigkeiten.put("Fuß pro Sekunde (ft/s)", 1.466667);
-            geschwindigkeiten.put("Fuß pro Minute (ft/m)", 88.0);
-            geschwindigkeiten.put("Mach", 0.0092);
+            geschwindigkeiten.put("Meter pro Sekunde", 1.0);
+            geschwindigkeiten.put("Meter pro Minute", 1.0 / 60.0);
+            geschwindigkeiten.put("Meter pro Stunde", 1.0 / 3600.0);
+
+            geschwindigkeiten.put("Zentimeter pro Sekunde", 0.01);
+            geschwindigkeiten.put("Zentimeter pro Minute", 0.01 / 60.0);
+            geschwindigkeiten.put("Zentimeter pro Stunde", 0.01 / 3600.0);
+
+            geschwindigkeiten.put("Kilometer pro Sekunde", 1000.0);
+            geschwindigkeiten.put("Kilometer pro Minute", 1000.0 / 60.0);
+            geschwindigkeiten.put("Kilometer pro Stunde", 1000.0 / 3600.0);
+
+            geschwindigkeiten.put("Knoten", 0.514444);
+            geschwindigkeiten.put("Meilen pro Stunde (Mph)", 0.44704);
+
+            geschwindigkeiten.put("Fuß pro Sekunde (ft/s)", 0.3048);
+            geschwindigkeiten.put("Fuß pro Minute (ft/m)", 0.3048 / 60.0);
+
+            geschwindigkeiten.put("Mach", 343.0); // ca. bei 20°C
 
 
 
