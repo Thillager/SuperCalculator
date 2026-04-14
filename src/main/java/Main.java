@@ -916,6 +916,8 @@ public class Main extends JFrame {
         }
     }
 
+
+
     class betterEinheitenUmrechner extends javax.swing.JPanel {
 
         // Einheiten-Tabellen
@@ -929,7 +931,7 @@ public class Main extends JFrame {
         private javax.swing.JComboBox<String> boxZu = new javax.swing.JComboBox<>();
         private javax.swing.JTextField eingabeFeld = new javax.swing.JTextField();
         private javax.swing.JLabel ergebnisLabel =
-                new javax.swing.JLabel("Ergebnis: ---", javax.swing.SwingConstants.CENTER);
+                new javax.swing.JLabel("Ergebnis: ---");
         private javax.swing.JButton berechnenButton =
                 new javax.swing.JButton("Umrechnen");
 
