@@ -973,35 +973,18 @@ public class Main extends JFrame {
             geschwindigkeiten.put("Fuß pro Sekunde (ft/s)", 0.3048);
             geschwindigkeiten.put("Fuß pro Minute (ft/m)", 0.3048 / 60.0);
 
-            geschwindigkeiten.put("Mach", 343.0); // ca. bei 20°C
 
 
-
-            // -------------------------
-            // 2. Kategorie Auswahl
-            // -------------------------
+            //Kategorieauswahl
             kategorieBox = new javax.swing.JComboBox<>(new String[]{"Länge", "Gewicht", "Geschwindigkeit"});
-
             kategorieBox.addActionListener(e -> {
                 boxVon.removeAllItems();
                 boxZu.removeAllItems();
-
-                if (kategorieBox.getSelectedItem().equals("Länge")) {
-                    for (String s : längen.keySet()) {
-                        boxVon.addItem(s);
-                        boxZu.addItem(s);
-                    }
+                if (kategorieBox.getSelectedItem().equals("Länge")) { for (String s : längen.keySet()) { boxVon.addItem(s); boxZu.addItem(s); }
                 } else if (kategorieBox.getSelectedItem().equals("Gewicht")) {
-                    for (String s : gewichte.keySet()) {
-                        boxVon.addItem(s);
-                        boxZu.addItem(s);
-                    }
+                    for (String s : gewichte.keySet()) { boxVon.addItem(s); boxZu.addItem(s); }
                 } else if (kategorieBox.getSelectedItem().equals("Geschwindigkeit")) {
-                    for (String s : geschwindigkeiten.keySet()) {
-                        boxVon.addItem(s);
-                        boxZu.addItem(s);
-                    }
-                }
+                    for (String s : geschwindigkeiten.keySet()) { boxVon.addItem(s); boxZu.addItem(s); } }
             });
 
             // -------------------------
