@@ -921,6 +921,7 @@ public class Main extends JFrame {
         // Einheiten-Tabellen
         private java.util.Map<String, Double> längen = new java.util.HashMap<>();
         private java.util.Map<String, Double> gewichte = new java.util.HashMap<>();
+        private java.util.Map<String, Double> geschwindigkeiten = new java.util.HashMap<>();
 
         // UI Komponenten
         private javax.swing.JComboBox<String> kategorieBox;
@@ -940,22 +941,39 @@ public class Main extends JFrame {
             längen.put("Millimeter", 0.001);
             längen.put("Zentimeter", 0.01);
             längen.put("Dezimeter", 0.1);
-            längen.put("Meter", 1.0);
+            längen.put("Meter", 1.0); // Basis
             längen.put("Kilometer", 1000.0);
             längen.put("Zoll (Inch)", 0.0254);
             längen.put("Fuss (Foot)", 0.3048);
             längen.put("Meile", 1609.34);
 
             gewichte.put("Milligramm", 0.001);
-            gewichte.put("Gramm", 1.0);
+            gewichte.put("Gramm", 1.0); // Basis
             gewichte.put("Kilogramm", 1000.0);
             gewichte.put("Tonne", 1000000.0);
             gewichte.put("Pfund (lbs)", 453.592);
 
+            geschwindigkeiten.put("Meter pro Sekkunde ", 1.0); //Basis
+            geschwindigkeiten.put("Meter pro Minute", 60.0);
+            geschwindigkeiten.put("Meter pro Stunde", 3600.0);
+            geschwindigkeiten.put("Zentimeter pro Sekunde", 100.0);;
+            geschwindigkeiten.put("Zentimeter pro Minute", 6000.0);
+            geschwindigkeiten.put("Zentimeter pro Stunde", 360000.0);
+            geschwindigkeiten.put("Kilometer pro Sekunde", 0.001);
+            geschwindigkeiten.put("Kilometer pro Minute", 3.6);
+            geschwindigkeiten.put("Kilometer pro Stunde", 3.6);
+            geschwindigkeiten.put("Knoten", 1.943844);
+            geschwindigkeiten.put("Meilen pro Stunde (Mph)", 2.236936);
+            geschwindigkeiten.put("Fuß pro Sekunde (ft/s)", 1.466667);
+            geschwindigkeiten.put("Fuß pro Minute (ft/m)", 88.0);
+            geschwindigkeiten.put("Mach", 0.0092);
+
+
+
             // -------------------------
             // 2. Kategorie Auswahl
             // -------------------------
-            kategorieBox = new javax.swing.JComboBox<>(new String[]{"Länge", "Gewicht"});
+            kategorieBox = new javax.swing.JComboBox<>(new String[]{"Länge", "Gewicht", "Geschwindigkeit"});
 
             kategorieBox.addActionListener(e -> {
                 boxVon.removeAllItems();
@@ -966,8 +984,13 @@ public class Main extends JFrame {
                         boxVon.addItem(s);
                         boxZu.addItem(s);
                     }
-                } else {
+                } else if (kategorieBox.getSelectedItem().equals("Gewicht")) {
                     for (String s : gewichte.keySet()) {
+                        boxVon.addItem(s);
+                        boxZu.addItem(s);
+                    }
+                } else if (kategorieBox.getSelectedItem().equals("Geschwindigkeit")) {
+                    for (String s : geschwindigkeiten.keySet()) {
                         boxVon.addItem(s);
                         boxZu.addItem(s);
                     }
@@ -1018,8 +1041,17 @@ public class Main extends JFrame {
             try {
                 String gewählteKat = (String) kategorieBox.getSelectedItem();
 
-                java.util.Map<String, Double> aktiveMap =
-                        gewählteKat.equals("Länge") ? längen : gewichte;
+                java.util.Map<String, Double> aktiveMap;
+                if (gewählteKat.equals("Länge")) {
+                    aktiveMap = längen;
+                } else if (gewählteKat.equals("Gewicht")) {
+                    aktiveMap = gewichte;
+                } else if (gewählteKat.equals("Geschwindigkeit")) {
+                    aktiveMap = geschwindigkeiten;
+                } else {
+                    aktiveMap = längen;
+                }
+
 
                 double wert = Double.parseDouble(eingabeFeld.getText().replace(",", "."));
 
