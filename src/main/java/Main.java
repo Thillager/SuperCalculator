@@ -27,6 +27,8 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
+
+
 public class Main extends JFrame {
     private JTextField inputField, resultField;
     private JButton calcBinom, calcNormal, solveBtn, clearBtn, copyBtn, tempumrechBtn, switchThemeBtn, autoAusBtn,
@@ -55,6 +57,7 @@ public class Main extends JFrame {
         initComponents(); // Erstellt alle Button-Objekte
         initializeUI(); // Baut die Panels zusammen
         setupListeners();
+        int xyxyx = 12;
     }
 
     private void initTexts() {
