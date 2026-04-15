@@ -927,6 +927,8 @@ public class Main extends JFrame {
             // -------------------------
             // 1. Einheiten definieren
             // -------------------------
+            längen.put("Nanometer", 0.000000001);
+            längen.put("Mikrometer", 0.000001);
             längen.put("Millimeter", 0.001);
             längen.put("Zentimeter", 0.01);
             längen.put("Dezimeter", 0.1);
@@ -934,31 +936,42 @@ public class Main extends JFrame {
             längen.put("Kilometer", 1000.0);
             längen.put("Zoll (Inch)", 0.0254);
             längen.put("Fuss (Foot)", 0.3048);
-            längen.put("Meile", 1609.34);
+            längen.put("Yard", 0.9144);
+            längen.put("Seemeile (Nautical)", 1852.0);
+            längen.put("Meile (Statute Mile)", 1609.34);
+            längen.put("Lichtsekunde", 299792458.0);
+            längen.put("Astronomische Einheit", 149597870700.0);
 
+            gewichte.put("Karat", 0.2);
+            gewichte.put("Mikrogramm", 0.000001);
             gewichte.put("Milligramm", 0.001);
             gewichte.put("Gramm", 1.0); // Basis
+            gewichte.put("Dekagramm", 10.0);
             gewichte.put("Kilogramm", 1000.0);
+            gewichte.put("Zentner", 50000.0);
             gewichte.put("Tonne", 1000000.0);
+            gewichte.put("Unze (Ounce)", 28.3495);
+            gewichte.put("Feinunze", 31.1035);
             gewichte.put("Pfund (lbs)", 453.592);
+            gewichte.put("Stone", 6350.29);
+            gewichte.put("US Tonne (Short Ton)", 907185.0);
 
-            geschwindigkeiten.put("Meter pro Sekunde", 1.0);
+            geschwindigkeiten.put("Meter pro Sekunde", 1.0); //Basis
             geschwindigkeiten.put("Meter pro Minute", 1.0 / 60.0);
             geschwindigkeiten.put("Meter pro Stunde", 1.0 / 3600.0);
-
             geschwindigkeiten.put("Zentimeter pro Sekunde", 0.01);
             geschwindigkeiten.put("Zentimeter pro Minute", 0.01 / 60.0);
             geschwindigkeiten.put("Zentimeter pro Stunde", 0.01 / 3600.0);
-
             geschwindigkeiten.put("Kilometer pro Sekunde", 1000.0);
             geschwindigkeiten.put("Kilometer pro Minute", 1000.0 / 60.0);
             geschwindigkeiten.put("Kilometer pro Stunde", 1000.0 / 3600.0);
-
             geschwindigkeiten.put("Knoten", 0.514444);
             geschwindigkeiten.put("Meilen pro Stunde (Mph)", 0.44704);
-
             geschwindigkeiten.put("Fuß pro Sekunde (ft/s)", 0.3048);
             geschwindigkeiten.put("Fuß pro Minute (ft/m)", 0.3048 / 60.0);
+            geschwindigkeiten.put("Schallgeschwindigkeit", 343.2);
+            geschwindigkeiten.put("Lichtgeschwindigkeit", 299792458.0);
+
 
 
 
