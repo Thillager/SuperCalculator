@@ -1,11 +1,4 @@
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -15,18 +8,7 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
-import javax.swing.Timer;
-
+import javax.swing.*;
 
 
 public class Main extends JFrame {
@@ -928,6 +910,7 @@ public class Main extends JFrame {
         private java.util.Map<String, Double> längen = new java.util.HashMap<>();
         private java.util.Map<String, Double> gewichte = new java.util.HashMap<>();
         private java.util.Map<String, Double> geschwindigkeiten = new java.util.HashMap<>();
+        private java.util.Map<String, Double> temperaturen = new java.util.HashMap<>();
 
         // UI Komponenten
         private javax.swing.JComboBox<String> kategorieBox;
@@ -980,7 +963,7 @@ public class Main extends JFrame {
 
 
             //Kategorieauswahl
-            kategorieBox = new javax.swing.JComboBox<>(new String[]{"Länge", "Gewicht", "Geschwindigkeit"});
+            kategorieBox = new javax.swing.JComboBox<>(new String[]{"Länge", "Gewicht", "Geschwindigkeit", "Temperatur"});
             kategorieBox.addActionListener(e -> {
                 boxVon.removeAllItems();
                 boxZu.removeAllItems();
@@ -989,6 +972,15 @@ public class Main extends JFrame {
                     for (String s : gewichte.keySet()) { boxVon.addItem(s); boxZu.addItem(s); }
                 } else if (kategorieBox.getSelectedItem().equals("Geschwindigkeit")) {
                     for (String s : geschwindigkeiten.keySet()) { boxVon.addItem(s); boxZu.addItem(s); } }
+                else if (kategorieBox.getSelectedItem().equals("Temperatur")) {
+                    boxVon.addItem("Celsius");
+                    boxVon.addItem("Fahrenheit");
+                    boxVon.addItem("Kelvin");
+
+                    boxZu.addItem("Celsius");
+                    boxZu.addItem("Fahrenheit");
+                    boxZu.addItem("Kelvin");
+                }
             });
 
             // -------------------------
@@ -1035,6 +1027,37 @@ public class Main extends JFrame {
             try {
                 String gewählteKat = (String) kategorieBox.getSelectedItem();
 
+                if (gewählteKat.equals("Temperatur")) {
+
+                    double wert = Double.parseDouble(eingabeFeld.getText().replace(",", "."));
+                    String von = (String) boxVon.getSelectedItem();
+                    String zu = (String) boxZu.getSelectedItem();
+
+                    double inCelsius = 0;
+                    double ergebnis = 0;
+
+                    // Schritt 1: → Celsius
+                    if (von.equals("Celsius")) {
+                        inCelsius = wert;
+                    } else if (von.equals("Fahrenheit")) {
+                        inCelsius = (wert - 32) * 5 / 9;
+                    } else if (von.equals("Kelvin")) {
+                        inCelsius = wert - 273.15;
+                    }
+
+                    // Schritt 2: Celsius → Ziel
+                    if (zu.equals("Celsius")) {
+                        ergebnis = inCelsius;
+                    } else if (zu.equals("Fahrenheit")) {
+                        ergebnis = (inCelsius * 9 / 5) + 32;
+                    } else if (zu.equals("Kelvin")) {
+                        ergebnis = inCelsius + 273.15;
+                    }
+
+                    ergebnisLabel.setText(String.format("Ergebnis: %.2f", ergebnis));
+                    return; // WICHTIG!
+                }
+
                 java.util.Map<String, Double> aktiveMap;
                 if (gewählteKat.equals("Länge")) {
                     aktiveMap = längen;
@@ -1078,5 +1101,11 @@ public class Main extends JFrame {
         SwingUtilities.invokeLater(() -> new Main().setVisible(true));
     }
 }
+
+
+
+
+
+
 
 
