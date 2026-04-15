@@ -1,11 +1,11 @@
 {
     "bin": {"SuperCalculator": "jdeploy-bundle/jdeploy.js"},
-    "author": "Thillager",
+    "author": "Thillager, JG",
     "description": "Very nice Calculator!",
     "main": "index.js",
     "preferGlobal": true,
     "repository": {"url": "https://github.com/Thillager/SuperCalculator"},
-    "version": "3.5.0",
+    "version": "4.0.0",
     "jdeploy": {
         "fallbackToUniversal": false,
         "generateLegacyBundles": false,
@@ -19,7 +19,6 @@
         "title": "SuperCalculator",
         "platformBundlesEnabled": false,
         "downloadPage": {"platforms": ["default"]}
-        "webapp": true
     },
     "dependencies": {
         "command-exists-promise": "^2.0.2",
