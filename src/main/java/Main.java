@@ -941,6 +941,7 @@ public class Main extends JFrame {
             längen.put("Meile (Statute Mile)", 1609.34);
             längen.put("Lichtsekunde", 299792458.0);
             längen.put("Astronomische Einheit", 149597870700.0);
+            längen.put("Planck-Länge (Fehleranfällig!!)", 1.616e-35);
 
             gewichte.put("Karat", 0.2);
             gewichte.put("Mikrogramm", 0.000001);
@@ -971,6 +972,7 @@ public class Main extends JFrame {
             geschwindigkeiten.put("Fuß pro Minute (ft/m)", 0.3048 / 60.0);
             geschwindigkeiten.put("Schallgeschwindigkeit", 343.2);
             geschwindigkeiten.put("Lichtgeschwindigkeit", 299792458.0);
+
 
 
 
