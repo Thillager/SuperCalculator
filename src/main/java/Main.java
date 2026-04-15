@@ -485,12 +485,16 @@ public class Main extends JFrame {
     }
 
     private void startebetterEinheitenRechner() {
-        mainPanel.removeAll();
-        mainPanel.setLayout(new java.awt.BorderLayout());
-        mainPanel.add(new betterEinheitenUmrechner(), BorderLayout.CENTER);
-        mainPanel.revalidate();
-        mainPanel.repaint();
-    }
+    JFrame einheiten = new JFrame("Einheiten Umrechner");
+
+    einheiten.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    einheiten.setSize(400, 400);
+    einheiten.setLocationRelativeTo(this); // zentriert relativ zum Hauptfenster
+
+    einheiten.add(new betterEinheitenUmrechner());
+
+    einheiten.setVisible(true);
+}
 
     private void starteBruchZuProzent() {
         try {
