@@ -985,8 +985,11 @@ public class Main extends JFrame {
                 } else if (kategorieBox.getSelectedItem().equals("Gewicht")) {
                     for (String s : gewichte.keySet()) { boxVon.addItem(s); boxZu.addItem(s); }
                 } else if (kategorieBox.getSelectedItem().equals("Geschwindigkeit")) {
-                    for (String s : geschwindigkeiten.keySet()) { boxVon.addItem(s); boxZu.addItem(s); } }
-                else if (kategorieBox.getSelectedItem().equals("Temperatur")) {
+                    for (String s : geschwindigkeiten.keySet()) {
+                        boxVon.addItem(s);
+                        boxZu.addItem(s);
+                    }
+                } else if (kategorieBox.getSelectedItem().equals("Temperatur")) {
                     boxVon.addItem("Celsius");
                     boxVon.addItem("Fahrenheit");
                     boxVon.addItem("Kelvin");
