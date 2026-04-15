@@ -5,7 +5,7 @@
     "main": "index.js",
     "preferGlobal": true,
     "repository": {"url": "https://github.com/Thillager/SuperCalculator"},
-    "version": "4.0.0",
+    "version": "4.1.0",
     "jdeploy": {
         "fallbackToUniversal": false,
         "generateLegacyBundles": false,
