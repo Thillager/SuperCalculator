@@ -905,205 +905,271 @@ public class Main extends JFrame {
 
     class betterEinheitenUmrechner extends javax.swing.JPanel {
 
-        // Einheiten-Tabellen
+        // -------------------------
+        // EINHEITEN
+        // -------------------------
         private java.util.Map<String, Double> längen = new java.util.HashMap<>();
         private java.util.Map<String, Double> gewichte = new java.util.HashMap<>();
         private java.util.Map<String, Double> geschwindigkeiten = new java.util.HashMap<>();
-        private java.util.Map<String, Double> temperaturen = new java.util.HashMap<>();
 
-        // UI Komponenten
+        // -------------------------
+        // UI
+        // -------------------------
         private javax.swing.JComboBox<String> kategorieBox;
         private javax.swing.JComboBox<String> boxVon = new javax.swing.JComboBox<>();
         private javax.swing.JComboBox<String> boxZu = new javax.swing.JComboBox<>();
         private javax.swing.JTextField eingabeFeld = new javax.swing.JTextField();
-        private javax.swing.JLabel ergebnisLabel =
-                new javax.swing.JLabel("Ergebnis: ---");
-        private javax.swing.JButton berechnenButton =
-                new javax.swing.JButton("Umrechnen");
+        private javax.swing.JLabel ergebnisLabel = new javax.swing.JLabel("Ergebnis: ---");
+
+        private javax.swing.JButton berechnenButton = new javax.swing.JButton("Umrechnen");
+        private javax.swing.JButton copyButton = new javax.swing.JButton("Kopieren");
 
         public betterEinheitenUmrechner() {
 
             // -------------------------
-            // 1. Einheiten definieren
+            // LÄNGEN (vollständig)
             // -------------------------
-            längen.put("Nanometer", 0.000000001);
-            längen.put("Mikrometer", 0.000001);
+            längen.put("Nanometer", 1e-9);
+            längen.put("Mikrometer", 1e-6);
             längen.put("Millimeter", 0.001);
             längen.put("Zentimeter", 0.01);
             längen.put("Dezimeter", 0.1);
-            längen.put("Meter", 1.0); // Basis
+            längen.put("Meter", 1.0);
+            längen.put("Dekameter", 10.0);
+            längen.put("Hektometer", 100.0);
             längen.put("Kilometer", 1000.0);
+
             längen.put("Zoll (Inch)", 0.0254);
             längen.put("Fuss (Foot)", 0.3048);
             längen.put("Yard", 0.9144);
-            längen.put("Seemeile (Nautical)", 1852.0);
-            längen.put("Meile (Statute Mile)", 1609.34);
+            längen.put("Meile (Statute)", 1609.344);
+            längen.put("Seemeile", 1852.0);
+
             längen.put("Lichtsekunde", 299792458.0);
             längen.put("Astronomische Einheit", 149597870700.0);
-            längen.put("Planck-Länge (Fehleranfällig!!)", 1.616e-35);
+            längen.put("Lichtjahr", 9.4607e15);
+            längen.put("Parsec", 3.0857e16);
+            längen.put("Planck-Länge", 1.616e-35);
 
-            gewichte.put("Karat", 0.2);
-            gewichte.put("Mikrogramm", 0.000001);
+            // -------------------------
+            // GEWICHTE
+            // -------------------------
+            gewichte.put("Mikrogramm", 1e-6);
             gewichte.put("Milligramm", 0.001);
-            gewichte.put("Gramm", 1.0); // Basis
+            gewichte.put("Gramm", 1.0);
             gewichte.put("Dekagramm", 10.0);
             gewichte.put("Kilogramm", 1000.0);
             gewichte.put("Zentner", 50000.0);
-            gewichte.put("Tonne", 1000000.0);
-            gewichte.put("Unze (Ounce)", 28.3495);
-            gewichte.put("Feinunze", 31.1035);
-            gewichte.put("Pfund (lbs)", 453.592);
-            gewichte.put("Stone", 6350.29);
-            gewichte.put("US Tonne (Short Ton)", 907185.0);
+            gewichte.put("Tonne", 1_000_000.0);
 
-            geschwindigkeiten.put("Meter pro Sekunde", 1.0); //Basis
+            gewichte.put("Unze", 28.3495);
+            gewichte.put("Feinunze", 31.1035);
+            gewichte.put("Pfund (lb)", 453.592);
+            gewichte.put("Stone", 6350.29);
+            gewichte.put("US-Tonne (Short Ton)", 907185.0);
+
+            // -------------------------
+            // GESCHWINDIGKEITEN
+            // -------------------------
+            geschwindigkeiten.put("Meter pro Sekunde", 1.0);
             geschwindigkeiten.put("Meter pro Minute", 1.0 / 60.0);
             geschwindigkeiten.put("Meter pro Stunde", 1.0 / 3600.0);
-            geschwindigkeiten.put("Zentimeter pro Sekunde", 0.01);
-            geschwindigkeiten.put("Zentimeter pro Minute", 0.01 / 60.0);
-            geschwindigkeiten.put("Zentimeter pro Stunde", 0.01 / 3600.0);
-            geschwindigkeiten.put("Kilometer pro Sekunde", 1000.0);
-            geschwindigkeiten.put("Kilometer pro Minute", 1000.0 / 60.0);
+
             geschwindigkeiten.put("Kilometer pro Stunde", 1000.0 / 3600.0);
+            geschwindigkeiten.put("Kilometer pro Sekunde", 1000.0);
+
+            geschwindigkeiten.put("Zentimeter pro Sekunde", 0.01);
+            geschwindigkeiten.put("Zentimeter pro Stunde", 0.01 / 3600.0);
+
+            geschwindigkeiten.put("Meilen pro Stunde", 0.44704);
+            geschwindigkeiten.put("Fuß pro Sekunde", 0.3048);
+
             geschwindigkeiten.put("Knoten", 0.514444);
-            geschwindigkeiten.put("Meilen pro Stunde (Mph)", 0.44704);
-            geschwindigkeiten.put("Fuß pro Sekunde (ft/s)", 0.3048);
-            geschwindigkeiten.put("Fuß pro Minute (ft/m)", 0.3048 / 60.0);
             geschwindigkeiten.put("Schallgeschwindigkeit", 343.2);
             geschwindigkeiten.put("Lichtgeschwindigkeit", 299792458.0);
 
-
-
-
-
-            //Kategorieauswahl
-            kategorieBox = new javax.swing.JComboBox<>(new String[]{"Länge", "Gewicht", "Geschwindigkeit", "Temperatur"});
-            kategorieBox.addActionListener(e -> {
-                boxVon.removeAllItems();
-                boxZu.removeAllItems();
-                if (kategorieBox.getSelectedItem().equals("Länge")) { for (String s : längen.keySet()) { boxVon.addItem(s); boxZu.addItem(s); }
-                } else if (kategorieBox.getSelectedItem().equals("Gewicht")) {
-                    for (String s : gewichte.keySet()) { boxVon.addItem(s); boxZu.addItem(s); }
-                } else if (kategorieBox.getSelectedItem().equals("Geschwindigkeit")) {
-                    for (String s : geschwindigkeiten.keySet()) {
-                        boxVon.addItem(s);
-                        boxZu.addItem(s);
-                    }
-                } else if (kategorieBox.getSelectedItem().equals("Temperatur")) {
-                    boxVon.addItem("Celsius");
-                    boxVon.addItem("Fahrenheit");
-                    boxVon.addItem("Kelvin");
-
-                    boxZu.addItem("Celsius");
-                    boxZu.addItem("Fahrenheit");
-                    boxZu.addItem("Kelvin");
-                }
+            // -------------------------
+            // COMBOBOX SETUP
+            // -------------------------
+            kategorieBox = new javax.swing.JComboBox<>(new String[]{
+                    "Länge", "Gewicht", "Geschwindigkeit", "Temperatur"
             });
 
+            kategorieBox.setMaximumRowCount(10);
+            boxVon.setMaximumRowCount(10);
+            boxZu.setMaximumRowCount(10);
+
             // -------------------------
-            // 3. Layout
+            // FIX: Kategorie Wechsel -> ComboBox Update
             // -------------------------
-            this.setLayout(new java.awt.GridLayout(10, 1, 5, 5));
-            this.setBorder(javax.swing.BorderFactory.createEmptyBorder(15, 15, 15, 15));
+            kategorieBox.addActionListener(e -> updateUnits());
 
-            this.add(new javax.swing.JLabel("1. Kategorie wählen:", javax.swing.SwingConstants.CENTER));
-            this.add(kategorieBox);
+            // initial korrekt laden
+            updateUnits();
 
-            this.add(new javax.swing.JLabel("2. Wert eingeben:", javax.swing.SwingConstants.CENTER));
-            this.add(eingabeFeld);
+            // -------------------------
+            // LAYOUT
+            // -------------------------
+            setLayout(new java.awt.BorderLayout(10, 10));
+            setBorder(javax.swing.BorderFactory.createEmptyBorder(15, 20, 15, 20));
 
-            this.add(new javax.swing.JLabel("3. Von:", javax.swing.SwingConstants.CENTER));
-            this.add(boxVon);
+            javax.swing.JPanel topPanel = new javax.swing.JPanel(
+                    new java.awt.GridLayout(8, 1, 5, 5)
+            );
 
-            this.add(new javax.swing.JLabel("4. Nach:", javax.swing.SwingConstants.CENTER));
-            this.add(boxZu);
+            topPanel.add(new javax.swing.JLabel("Kategorie:", javax.swing.SwingConstants.CENTER));
+            topPanel.add(kategorieBox);
+
+            topPanel.add(new javax.swing.JLabel("Wert:", javax.swing.SwingConstants.CENTER));
+            topPanel.add(eingabeFeld);
+
+            topPanel.add(new javax.swing.JLabel("Von:", javax.swing.SwingConstants.CENTER));
+            topPanel.add(boxVon);
+
+            topPanel.add(new javax.swing.JLabel("Nach:", javax.swing.SwingConstants.CENTER));
+            topPanel.add(boxZu);
+
+            // -------------------------
+            // BUTTONS
+            // -------------------------
+            javax.swing.JPanel buttonPanel = new javax.swing.JPanel();
+            buttonPanel.setLayout(new java.awt.GridLayout(2, 1, 10, 10));
+
+            java.awt.Dimension btnSize = new java.awt.Dimension(200, 45);
+
+            berechnenButton.setPreferredSize(btnSize);
+            copyButton.setPreferredSize(btnSize);
 
             berechnenButton.setBackground(new java.awt.Color(70, 130, 180));
             berechnenButton.setForeground(java.awt.Color.WHITE);
-            berechnenButton.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 12));
 
-            this.add(berechnenButton);
+            copyButton.setBackground(new java.awt.Color(70, 130, 180));
+            copyButton.setForeground(java.awt.Color.WHITE);
 
-            ergebnisLabel.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 14));
-            this.add(ergebnisLabel);
+            buttonPanel.add(berechnenButton);
+            buttonPanel.add(copyButton);
 
-            // Button-Action
+            // -------------------------
+            // RESULT
+            // -------------------------
+            javax.swing.JPanel resultPanel = new javax.swing.JPanel(new java.awt.BorderLayout());
+
+            ergebnisLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+            ergebnisLabel.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 18));
+
+            resultPanel.add(ergebnisLabel, java.awt.BorderLayout.CENTER);
+
+            // -------------------------
+            // ADD TO PANEL
+            // -------------------------
+            add(topPanel, java.awt.BorderLayout.NORTH);
+            add(buttonPanel, java.awt.BorderLayout.CENTER);
+            add(resultPanel, java.awt.BorderLayout.SOUTH);
+
+            // -------------------------
+            // LISTENER
+            // -------------------------
             berechnenButton.addActionListener(e -> umrechnen());
 
-            // Initiale Befüllung
-            for (String s : längen.keySet()) {
-                boxVon.addItem(s);
-                boxZu.addItem(s);
-            }
+            copyButton.addActionListener(e -> {
+                String text = ergebnisLabel.getText();
+
+                if (text.contains("---")) {
+                    javax.swing.JOptionPane.showMessageDialog(this, "Noch kein Ergebnis!");
+                    return;
+                }
+
+                text = text.replace("Ergebnis: ", "");
+
+                java.awt.Toolkit.getDefaultToolkit()
+                        .getSystemClipboard()
+                        .setContents(new java.awt.datatransfer.StringSelection(text), null);
+
+                javax.swing.JOptionPane.showMessageDialog(this, "Kopiert!");
+            });
         }
 
         // -------------------------
-        // 4. Umrechnungslogik
+        // 🔥 FIX: UPDATE LOGIK
+        // -------------------------
+        private void updateUnits() {
+            boxVon.removeAllItems();
+            boxZu.removeAllItems();
+
+            String kat = (String) kategorieBox.getSelectedItem();
+            if (kat == null) return;
+
+            if (kat.equals("Länge")) {
+                for (String s : längen.keySet()) {
+                    boxVon.addItem(s);
+                    boxZu.addItem(s);
+                }
+            } else if (kat.equals("Gewicht")) {
+                for (String s : gewichte.keySet()) {
+                    boxVon.addItem(s);
+                    boxZu.addItem(s);
+                }
+            } else if (kat.equals("Geschwindigkeit")) {
+                for (String s : geschwindigkeiten.keySet()) {
+                    boxVon.addItem(s);
+                    boxZu.addItem(s);
+                }
+            } else if (kat.equals("Temperatur")) {
+                String[] temp = {"Celsius", "Fahrenheit", "Kelvin"};
+                for (String s : temp) {
+                    boxVon.addItem(s);
+                    boxZu.addItem(s);
+                }
+            }
+
+            if (boxVon.getItemCount() > 0) boxVon.setSelectedIndex(0);
+            if (boxZu.getItemCount() > 0) boxZu.setSelectedIndex(0);
+        }
+
+        // -------------------------
+        // LOGIK
         // -------------------------
         private void umrechnen() {
             try {
-                String gewählteKat = (String) kategorieBox.getSelectedItem();
-
-                if (gewählteKat.equals("Temperatur")) {
-
-                    double wert = Double.parseDouble(eingabeFeld.getText().replace(",", "."));
-                    String von = (String) boxVon.getSelectedItem();
-                    String zu = (String) boxZu.getSelectedItem();
-
-                    double inCelsius = 0;
-                    double ergebnis = 0;
-
-                    // Schritt 1: → Celsius
-                    if (von.equals("Celsius")) {
-                        inCelsius = wert;
-                    } else if (von.equals("Fahrenheit")) {
-                        inCelsius = (wert - 32) * 5 / 9;
-                    } else if (von.equals("Kelvin")) {
-                        inCelsius = wert - 273.15;
-                    }
-
-                    // Schritt 2: Celsius → Ziel
-                    if (zu.equals("Celsius")) {
-                        ergebnis = inCelsius;
-                    } else if (zu.equals("Fahrenheit")) {
-                        ergebnis = (inCelsius * 9 / 5) + 32;
-                    } else if (zu.equals("Kelvin")) {
-                        ergebnis = inCelsius + 273.15;
-                    }
-
-                    ergebnisLabel.setText(String.format("Ergebnis: %.2f", ergebnis));
-                    return; // WICHTIG!
-                }
-
-                java.util.Map<String, Double> aktiveMap;
-                if (gewählteKat.equals("Länge")) {
-                    aktiveMap = längen;
-                } else if (gewählteKat.equals("Gewicht")) {
-                    aktiveMap = gewichte;
-                } else if (gewählteKat.equals("Geschwindigkeit")) {
-                    aktiveMap = geschwindigkeiten;
-                } else {
-                    aktiveMap = längen;
-                }
-
+                String kat = (String) kategorieBox.getSelectedItem();
 
                 double wert = Double.parseDouble(eingabeFeld.getText().replace(",", "."));
+                String von = (String) boxVon.getSelectedItem();
+                String zu = (String) boxZu.getSelectedItem();
 
-                double vonFaktor = aktiveMap.get(boxVon.getSelectedItem());
-                double zuFaktor = aktiveMap.get(boxZu.getSelectedItem());
+                double result;
 
-                double ergebnis = (wert * vonFaktor) / zuFaktor;
+                if (kat.equals("Temperatur")) {
+                    double c;
 
-                ergebnisLabel.setText(String.format("Ergebnis: %.4f", ergebnis));
+                    if (von.equals("Celsius")) c = wert;
+                    else if (von.equals("Fahrenheit")) c = (wert - 32) * 5 / 9;
+                    else c = wert - 273.15;
+
+                    if (zu.equals("Celsius")) result = c;
+                    else if (zu.equals("Fahrenheit")) result = c * 9 / 5 + 32;
+                    else result = c + 273.15;
+
+                    ergebnisLabel.setText(String.format("Ergebnis: %.2f", result));
+                    return;
+                }
+
+                java.util.Map<String, Double> map =
+                        kat.equals("Länge") ? längen :
+                                kat.equals("Gewicht") ? gewichte :
+                                geschwindigkeiten;
+
+                result = (wert * map.get(von)) / map.get(zu);
+
+                ergebnisLabel.setText(String.format("Ergebnis: %.4f", result));
                 ergebnisLabel.setForeground(java.awt.Color.BLACK);
 
-            } catch (Exception ex) {
-                ergebnisLabel.setText("Fehler: Zahl prüfen!");
+            } catch (Exception e) {
+                ergebnisLabel.setText("Fehler!");
                 ergebnisLabel.setForeground(java.awt.Color.RED);
             }
         }
     }
-
     class Branch {
         String name;
         double probability;
