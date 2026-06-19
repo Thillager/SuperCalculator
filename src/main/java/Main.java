@@ -1192,13 +1192,12 @@ public class Main extends JFrame {
 		private JTabbedPane tabs;
 
 		private JTextField funktionFeld;
+		private JTextField xScaleField;
+		private JTextField yScaleField;
 
 		private JTextArea punkteArea;
 
 		private JButton zeichnenButton;
-
-		private JTextField xScaleField;
-		private JTextField yScaleField;
 
 		private GraphPanel graphPanel;
 
@@ -1206,66 +1205,168 @@ public class Main extends JFrame {
 
 			setLayout(new BorderLayout());
 
+			// =========================
+			// SIDEBAR
+			// =========================
+
+			JPanel sideBar = new JPanel();
+			sideBar.setLayout(new BorderLayout());
+
+			sideBar.setPreferredSize(new Dimension(300, 0));
+
+			sideBar.setBackground(new Color(35, 35, 35));
+
+			// =========================
+			// TABS
+			// =========================
+
 			tabs = new JTabbedPane();
 
-			//------------------------
+			// =========================
 			// FUNKTIONEN TAB
-			//------------------------
+			// =========================
 
-			JPanel funkPanel = new JPanel(new BorderLayout());
+			JPanel funkPanel = new JPanel();
 
-			JPanel oben = new JPanel();
+			funkPanel.setLayout(
+					new BoxLayout(funkPanel, BoxLayout.Y_AXIS));
 
-			funktionFeld = new JTextField("x*x", 25);
+			funkPanel.setBackground(new Color(35, 35, 35));
+
+			funkPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+
+			JLabel titel = new JLabel("Funktionen");
+
+			titel.setForeground(Color.WHITE);
+
+			titel.setFont(new Font("Segoe UI", Font.BOLD, 18));
+
+			funkPanel.add(titel);
+			funkPanel.add(Box.createVerticalStrut(15));
+
+			JLabel fLabel = new JLabel("f(x)");
+
+			fLabel.setForeground(Color.WHITE);
+
+			funktionFeld = createModernField("x*x");
+
+			funkPanel.add(fLabel);
+			funkPanel.add(funktionFeld);
+
+			funkPanel.add(Box.createVerticalStrut(15));
+
+			JLabel xLabel = new JLabel("X-Skalierung");
+
+			xLabel.setForeground(Color.WHITE);
+
+			xScaleField = createModernField("40");
+
+			funkPanel.add(xLabel);
+			funkPanel.add(xScaleField);
+
+			funkPanel.add(Box.createVerticalStrut(15));
+
+			JLabel yLabel = new JLabel("Y-Skalierung");
+
+			yLabel.setForeground(Color.WHITE);
+
+			yScaleField = createModernField("40");
+
+			funkPanel.add(yLabel);
+			funkPanel.add(yScaleField);
+
+			funkPanel.add(Box.createVerticalStrut(20));
 
 			zeichnenButton = new JButton("Zeichnen");
 
-			xScaleField = new JTextField("40", 5);
-			yScaleField = new JTextField("40", 5);
+			zeichnenButton.setBackground(new Color(0, 150, 255));
 
-			oben.add(new JLabel("f(x) ="));
-			oben.add(funktionFeld);
+			zeichnenButton.setForeground(Color.WHITE);
 
-			oben.add(new JLabel("X-Skalierung"));
-			oben.add(xScaleField);
+			zeichnenButton.setFocusPainted(false);
 
-			oben.add(new JLabel("Y-Skalierung"));
-			oben.add(yScaleField);
+			zeichnenButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
 
-			oben.add(zeichnenButton);
+			funkPanel.add(zeichnenButton);
 
-			funkPanel.add(oben, BorderLayout.NORTH);
+			funkPanel.add(Box.createVerticalGlue());
 
-			//------------------------
+			// =========================
 			// TABELLEN TAB
-			//------------------------
+			// =========================
 
 			JPanel tabellenPanel = new JPanel(new BorderLayout());
+
+			tabellenPanel.setBackground(new Color(35,35,35));
+
+			tabellenPanel.setBorder(BorderFactory.createEmptyBorder(15,15,15,15));
+
+			JLabel tabellenTitel = new JLabel("Punkte");
+
+			tabellenTitel.setForeground(Color.WHITE);
+
+			tabellenTitel.setFont(new Font("Segoe UI", Font.BOLD, 18));
 
 			punkteArea = new JTextArea();
 
 			punkteArea.setText(
-					"0,0\n" +
+							"0,0\n" +
 							"1,1\n" +
 							"2,4\n" +
 							"3,9"
 			);
 
-			tabellenPanel.add(
-					new JScrollPane(punkteArea),
+			punkteArea.setBackground(
+					new Color(50,50,50)
+			);
+
+			punkteArea.setForeground(Color.WHITE);
+
+			punkteArea.setCaretColor(Color.WHITE);
+
+			tabellenPanel.add(tabellenTitel, BorderLayout.NORTH);
+
+			tabellenPanel.add(new JScrollPane(punkteArea), BorderLayout.CENTER);
+
+			// =========================
+			// TABS HINZUFÜGEN
+			// =========================
+
+			tabs.addTab(
+					"Funktionen",
+					funkPanel
+			);
+
+			tabs.addTab(
+					"Tabelle",
+					tabellenPanel
+			);
+
+			sideBar.add(
+					tabs,
 					BorderLayout.CENTER
 			);
 
-			//------------------------
+			add(
+					sideBar,
+					BorderLayout.WEST
+			);
 
-			tabs.addTab("Funktionen", funkPanel);
-			tabs.addTab("Tabelle", tabellenPanel);
+			// =========================
+			// GRAPH
+			// =========================
 
-			add(tabs, BorderLayout.WEST);
+			graphPanel =
+					new GraphPanel();
 
-			graphPanel = new GraphPanel();
+			add(
+					graphPanel,
+					BorderLayout.CENTER
+			);
 
-			add(graphPanel, BorderLayout.CENTER);
+			// =========================
+			// BUTTON
+			// =========================
 
 			zeichnenButton.addActionListener(e -> {
 
@@ -1275,17 +1376,80 @@ public class Main extends JFrame {
 							funktionFeld.getText();
 
 					graphPanel.scaleX =
-							Double.parseDouble(xScaleField.getText());
+							Double.parseDouble(
+									xScaleField.getText()
+							);
 
 					graphPanel.scaleY =
-							Double.parseDouble(yScaleField.getText());
+							Double.parseDouble(
+									yScaleField.getText()
+							);
 
 					graphPanel.repaint();
 
 				} catch (Exception ex) {
-					ex.printStackTrace();
+
+					JOptionPane.showMessageDialog(
+							this,
+							"Ungültige Eingabe"
+					);
 				}
 			});
+		}
+
+		private JTextField createModernField(
+				String text
+		) {
+
+			JTextField field =
+					new JTextField(text);
+
+			field.setMaximumSize(
+					new Dimension(
+							Integer.MAX_VALUE,
+							35
+					)
+			);
+
+			field.setFont(
+					new Font(
+							"Segoe UI",
+							Font.PLAIN,
+							14
+					)
+			);
+
+			field.setBackground(
+					new Color(50,50,50)
+			);
+
+			field.setForeground(
+					Color.WHITE
+			);
+
+			field.setCaretColor(
+					Color.WHITE
+			);
+
+			field.setBorder(
+					BorderFactory.createCompoundBorder(
+							BorderFactory.createLineBorder(
+									new Color(
+											80,
+											80,
+											80
+									)
+							),
+							BorderFactory.createEmptyBorder(
+									5,
+									8,
+									5,
+									8
+							)
+					)
+			);
+
+			return field;
 		}
 	}
 	class GraphPanel extends JPanel {
@@ -1306,6 +1470,13 @@ public class Main extends JFrame {
 
 			Graphics2D g2 =
 					(Graphics2D) g;
+			g2.setFont(
+					new Font(
+							"Segoe UI",
+							Font.PLAIN,
+							12
+					)
+			);
 
 			int w = getWidth();
 			int h = getHeight();
@@ -1313,18 +1484,88 @@ public class Main extends JFrame {
 			int centerX = w / 2;
 			int centerY = h / 2;
 
-			g2.setColor(Color.LIGHT_GRAY);
+			g2.setColor(new Color(70,70,70));
 
-			for(int x=0;x<w;x+=(int)scaleX)
+			for(int x = centerX; x < w; x += (int)scaleX)
 				g2.drawLine(x,0,x,h);
 
-			for(int y=0;y<h;y+=(int)scaleY)
+			for(int x = centerX; x > 0; x -= (int)scaleX)
+				g2.drawLine(x,0,x,h);
+
+			for(int y = centerY; y < h; y += (int)scaleY)
 				g2.drawLine(0,y,w,y);
 
-			g2.setColor(Color.BLACK);
+			for(int y = centerY; y > 0; y -= (int)scaleY)
+				g2.drawLine(0,y,w,y);
+
+			g2.setColor(Color.WHITE);
 
 			g2.drawLine(0,centerY,w,centerY);
 			g2.drawLine(centerX,0,centerX,h);
+			for (int i = -50; i <= 50; i++) {
+
+				int px =
+						centerX +
+								(int)(i * scaleX);
+
+				if (px < 0 || px > w)
+					continue;
+
+				g2.drawLine(
+						px,
+						centerY - 4,
+						px,
+						centerY + 4
+				);
+
+				g2.drawString(
+						String.valueOf(i),
+						px - 5,
+						centerY + 18
+				);
+			}
+			for (int i = -50; i <= 50; i++) {
+
+				int py =
+						centerY -
+								(int)(i * scaleY);
+
+				if (py < 0 || py > h)
+					continue;
+
+				g2.drawLine(
+						centerX - 4,
+						py,
+						centerX + 4,
+						py
+				);
+
+				if (i != 0) {
+
+					g2.drawString(
+							String.valueOf(i),
+							centerX + 8,
+							py + 5
+					);
+				}
+			}
+			g2.fillOval(
+					centerX - 4,
+					centerY - 4,
+					8,
+					8
+			);
+			g2.drawString(
+					"x",
+					w - 20,
+					centerY - 10
+			);
+
+			g2.drawString(
+					"y",
+					centerX + 10,
+					20
+			);
 
 			g2.setColor(Color.RED);
 
@@ -1365,6 +1606,7 @@ public class Main extends JFrame {
 				lastY = py;
 			}
 		}
+
 
 		private double eval(String f,double x){
 
