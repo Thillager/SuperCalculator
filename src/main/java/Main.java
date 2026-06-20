@@ -1498,7 +1498,7 @@ public class Main extends JFrame {
 			for(int y = centerY; y > 0; y -= (int)scaleY)
 				g2.drawLine(0,y,w,y);
 
-			g2.setColor(Color.WHITE);
+			g2.setColor(Color.BLACK);
 
 			g2.drawLine(0,centerY,w,centerY);
 			g2.drawLine(centerX,0,centerX,h);
@@ -1549,12 +1549,14 @@ public class Main extends JFrame {
 					);
 				}
 			}
+
 			g2.fillOval(
 					centerX - 4,
 					centerY - 4,
 					8,
 					8
 			);
+
 			g2.drawString(
 					"x",
 					w - 20,
@@ -1567,40 +1569,71 @@ public class Main extends JFrame {
 					20
 			);
 
-			g2.setColor(Color.RED);
 
-			int lastX = 0;
-			int lastY = 0;
 
-			boolean first = true;
+			g2.setColor(new Color(0,120,255));
 
-			for(double x=-100;x<=100;x+=0.05){
+			Integer lastX = null;
+			Integer lastY = null;
+
+			for(double x = -100.0; x <= 100.0; x += 0.01){
 
 				double y;
 
 				try{
-					y = eval(function,x);
+					y = eval(function, x);
 				}
 				catch(Exception e){
+
+					lastX = null;
+					lastY = null;
+
 					continue;
 				}
 
-				int px =
-						centerX +
-								(int)(x*scaleX);
+				if(Double.isNaN(y) || Double.isInfinite(y)){
 
-				int py =
-						centerY -
-								(int)(y*scaleY);
+					lastX = null;
+					lastY = null;
 
-				if(!first){
-					g2.drawLine(
-							lastX,lastY,
-							px,py
-					);
+					continue;
 				}
 
-				first = false;
+				double pxD =
+						centerX +
+								x * scaleX;
+
+				double pyD =
+						centerY -
+								y * scaleY;
+
+				int px =
+						(int)Math.round(pxD);
+
+				int py =
+						(int)Math.round(pyD);
+
+				if(py < -5000 || py > h + 5000){
+
+					lastX = null;
+					lastY = null;
+
+					continue;
+				}
+
+				if(lastX != null){
+
+					// Große y-Sprünge ignorieren (Unstetigkeiten wie bei 1/x)
+					if(Math.abs(py - lastY) < h * 2){
+
+						g2.drawLine(
+								lastX,
+								lastY,
+								px,
+								py
+						);
+					}
+				}
 
 				lastX = px;
 				lastY = py;
